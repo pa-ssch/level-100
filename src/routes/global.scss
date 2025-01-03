@@ -6,19 +6,8 @@ body {
 	background-color: $background;
 	color: $foreground;
 	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-
-	nav {
-		border-bottom: 1px solid $foreground-accent;
-		padding: 10px;
-		a,
-		a:active,
-		a:visited {
-			padding: 20px;
-			color: $foreground;
-			text-decoration: none;
-		}
-		a:hover {
-			color: $foreground-accent;
-		}
-	}
+	margin: 0px;
+}
+button {
+	cursor: pointer;
 }
