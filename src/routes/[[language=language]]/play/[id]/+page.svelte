@@ -11,3 +11,5 @@ dass man ein spiel über nen link öffnen soll oder qr code scannen. /sprache/pl
 </p>
 
 <!-- if no params nav to prepare -->
+
+<!-- wenn zu  id nix da ist, hat eventuell ein spieler das falsch geteilt? -->

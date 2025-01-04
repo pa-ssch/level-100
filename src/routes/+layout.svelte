@@ -9,7 +9,8 @@
 
 <div class="page">
 	<nav class="header">
-		<a href="/">Level 100!</a>
+		<a class="noselect" href="/">Level 100!</a>
+		<!-- Wenn ich bei play oder prepare bin gibts oben nen zurück knopf. Header ist wie bei youtube music.  -->
 	</nav>
 
 	<div class="content">
@@ -18,13 +19,18 @@
 
 	<footer class="footer">
 		<!-- disclaimer shown here -->
-		<a href="/about">About</a>
-		<a href="/imprint">Imprint</a>
-		<a href="/privacy">Privacy</a>
-		<button aria-label="Change Language" onclick={changeLanguage}>
-			<i class="fa-solid fa-language"> </i>change language
-		</button>
-		<button>test</button>
+		<div class="left">
+			<a href="/about">About</a>
+			<a href="/imprint">Imprint</a>
+			<a href="/privacy">Privacy</a>
+		</div>
+		<div class="right">
+			<button aria-label="Change Language" onclick={changeLanguage}>
+				<i class="fa-solid fa-language"> </i>change language
+			</button>
+			<button>test</button>
+			<input type="button" value="kljkjl" />
+		</div>
 	</footer>
 </div>
 
@@ -43,24 +49,34 @@
 			font-size: 2em;
 			font-weight: bold;
 			text-align: center;
-
-			border-bottom: 1px solid $foreground-accent !important;
-
-			a,
-			a:active,
-			a:visited,
-			a:hover {
-				padding: 20px;
-				color: $foreground;
-				text-decoration: none;
-			}
-		}
-
-		.content {
 		}
 
 		.footer {
 			text-align: center;
+			font-size: 0.75em;
+			display: grid;
+			justify-items: center;
+			align-items: center;
+			margin: 0px 50px;
+			grid-template-columns: 1fr, 1fr;
+			grid-template-areas: 'left right';
+			.left,
+			.right {
+				display: flex;
+				flex-direction: column;
+
+				> * {
+					margin: 10px;
+				}
+			}
+
+			.left {
+				grid-area: left;
+			}
+
+			.right {
+				grid-area: right;
+			}
 		}
 	}
 </style>

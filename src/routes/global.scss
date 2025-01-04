@@ -7,7 +7,40 @@ body {
 	color: $foreground;
 	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 	margin: 0px;
-}
-button {
-	cursor: pointer;
+	border-color: $foreground;
+
+	a,
+	a:active,
+	a:visited {
+		color: $foreground;
+		text-decoration: none;
+	}
+
+	a:hover,
+	button:hover,
+	input[type='button']:hover {
+		color: $foreground-accent;
+	}
+
+	button:active,
+	input[type='button']:active {
+		transform: scale(0.9);
+	}
+
+	button,
+	input[type='button'] {
+		cursor: pointer;
+		background-color: $background;
+		color: $foreground;
+	}
+
+	.noselect {
+		-webkit-touch-callout: none; /* iOS Safari */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Old versions of Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+		user-select: none; /* Non-prefixed version, currently
+									  supported by Chrome, Edge, Opera and Firefox */
+	}
 }
