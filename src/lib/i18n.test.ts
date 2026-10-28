@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectLanguage, htmlLang, isLanguage, otherLanguage } from './i18n';
+import { detectLanguage, footerLabel, htmlLang, isLanguage, otherLanguage } from './i18n';
 
 describe('i18n', () => {
 	it('erkennt nur die unterstützten Sprachen', () => {
@@ -25,5 +25,11 @@ describe('i18n', () => {
 	it('wechselt zwischen den beiden Sprachen', () => {
 		expect(otherLanguage('de-DE')).toBe('en-US');
 		expect(otherLanguage('en-US')).toBe('de-DE');
+	});
+
+	it('liefert Footer-Beschriftungen je Sprache mit Fallback', () => {
+		expect(footerLabel('de-DE', 'imprint')).toBe('Impressum & Datenschutz');
+		expect(footerLabel('en-US', 'imprint')).toBe('Imprint & Privacy');
+		expect(footerLabel(undefined, 'about')).toBe('About');
 	});
 });

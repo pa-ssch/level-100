@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import type { ResolvedPathname } from '$app/types';
-	import { isLanguage, otherLanguage } from '$lib/i18n';
+	import { footerLabel, isLanguage, otherLanguage } from '$lib/i18n';
 	import './global.scss';
 
 	let { children } = $props();
@@ -33,11 +33,9 @@
 	</main>
 
 	<footer class="footer">
-		<!-- TODO (PLAN.md Phase 3): Disclaimer hier anzeigen -->
 		<div class="left">
-			<a href={resolve('/about')}>About</a>
-			<a href={resolve('/imprint')}>Imprint</a>
-			<a href={resolve('/privacy')}>Privacy</a>
+			<a href={resolve('/about')}>{footerLabel(page.params.language, 'about')}</a>
+			<a href={resolve('/imprint')}>{footerLabel(page.params.language, 'imprint')}</a>
 		</div>
 		<div class="right">
 			{#if languageSwitch}

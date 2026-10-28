@@ -19,3 +19,17 @@ export function htmlLang(language: string | undefined): string {
 export function otherLanguage(language: Language): Language {
 	return language === 'de-DE' ? 'en-US' : 'de-DE';
 }
+
+/** Sprache des HTML-Dokuments für Seiten außerhalb der Sprach-Routen. */
+export const fixedRouteLanguages: Record<string, Language> = {
+	'/imprint': 'de-DE'
+};
+
+const footerLabels = {
+	'de-DE': { about: 'Über', imprint: 'Impressum & Datenschutz' },
+	'en-US': { about: 'About', imprint: 'Imprint & Privacy' }
+} as const;
+
+export function footerLabel(language: string | undefined, key: keyof (typeof footerLabels)['de-DE']): string {
+	return footerLabels[isLanguage(language) ? language : defaultLanguage][key];
+}
