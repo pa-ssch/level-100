@@ -19,6 +19,7 @@ yarn check      # Typen und Svelte-Diagnose
 yarn lint       # Prettier und ESLint
 yarn test       # Unit-Tests (Vitest)
 yarn build      # Statischer Export nach build/
+yarn test:e2e   # Playwright gegen build/ (vorher yarn build; einmalig yarn playwright install)
 yarn preview    # Build lokal ansehen
 ```
 
@@ -27,9 +28,12 @@ yarn preview    # Build lokal ansehen
 - `src/lib/` – Domänenmodell (Regelsatz, Kartendeck), i18n-Helfer, Tests daneben als `*.test.ts`
 - `src/routes/[[language=language]]/` – Seiten je Sprache (`de-DE`, `en-US`): `start`, `prepare`, `play`
 - `src/routes/about|imprint|privacy` – Disclaimer, Impressum, Datenschutz
+- `e2e/` – Playwright-Tests gegen den statischen Build: Rendering, Barrierefreiheit (axe), CSP, keine fremden Requests, Impressum
+- `test/` – Tests für die Konfiguration (CSP-Hash)
 - `static/` – `CNAME`, `robots.txt`, Favicon
 
-Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Spielzustand und geteilte Regelsätze leben
+Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Die Content-Security-Policy steht als Meta-Tag in jeder
+Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0). Spielzustand und geteilte Regelsätze leben
 ausschließlich in der URL und im `localStorage` des Browsers.
 
 ## Deployment

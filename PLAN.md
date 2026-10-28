@@ -1,6 +1,6 @@
 # Level 100 – Plan: Ziele und Todos bis zur Veröffentlichung
 
-Stand: 28.10.2026 (Phase 0, 1 und 2 umgesetzt und deployt; DNS für lvl100.de offen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
+Stand: 28.10.2026 (Phase 0 bis 5 im Kern umgesetzt und deployt; DNS für lvl100.de offen; Phase 6 Features als Nächstes). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
 [pa-ssch/one-clue](https://github.com/pa-ssch/one-clue) und [pa-ssch/pdfshuffle](https://github.com/pa-ssch/pdfshuffle).
 
 ## Ziel
@@ -83,39 +83,44 @@ Vorlage: `.github/workflows/ci.yml` aus pdfshuffle (Lint → Typecheck → Unit 
 
 - [x] Workflow mit auf SHA gepinnten Actions (checkout, setup-node, upload-pages-artifact, deploy-pages), `permissions: contents: read`, `concurrency`, `timeout-minutes`.
 - [x] Schritte: `yarn install --immutable`, `yarn npm audit --severity high`, `yarn lint`, `yarn check`, `yarn test`, `yarn build`, Upload + Deploy. Erster Lauf grün (28.10.2026).
-- [ ] Playwright e2e gegen `build/` ergänzen, Playwright-Report als Artifact bei Fehler (mit Phase 5).
+- [x] Playwright e2e gegen `build/` in der CI (Chromium + WebKit), Playwright-Report als Artifact bei Fehler.
 - [x] `.github/dependabot.yml` für npm und github-actions (wöchentlich, gruppiert).
 - [ ] Branch-Protection auf `main`: CI muss grün sein.
-- [ ] Optional (wie one-clue `live-check.yml`): nächtlicher Live-Check der veröffentlichten Seite (HTTPS, Zertifikat, Seite lädt fehlerfrei).
+- [ ] Optional (wie one-clue `live-check.yml`): nächtlicher Live-Check der veröffentlichten Seite (HTTPS, Zertifikat, Seite lädt fehlerfrei). Erst sinnvoll, wenn DNS steht.
 
 ### Phase 3 – Rechtliches (½ Tag)
 
 Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben nach § 5 DDG, § 18 MStV, VSBG, GitHub-Pages-Hosting, DPF, Aufsichtsbehörde BW, Stand-Datum).
 
-- [ ] Impressum unter `/imprint` (bzw. `/impressum`): Betreiber 9xb, Anschrift, E-Mail, Haftung, Open-Source-Hinweis.
-- [ ] Datenschutzerklärung unter `/privacy`: kein Server, keine Cookies, GitHub Pages Logfiles, **localStorage-Einträge namentlich auflisten** (History, Favoriten, Sprache), Kontakt, Betroffenenrechte.
-- [ ] About/Disclaimer: Abgrenzung zu „Phase 10“, „Stufe 10“, Contract Rummy etc. ausformulieren, Platzhalter `[Kontakt-E-Mail]` ersetzen.
-- [ ] Rechtsseiten auf Deutsch mit kurzer englischer Zusammenfassung (wie pdfshuffle), aus jedem Footer erreichbar, Rückverlinkung zur Startseite.
-- [ ] Tests (Phase 5) prüfen: Pflichtangaben vorhanden, keine Platzhalter, DDG statt TMG, Stand-Datum.
+- [x] Impressum unter `/imprint` nach one-clue-Vorbild (eine Seite mit Impressum und Datenschutz, Du-Form): Betreiber 9xb, Anschrift, E-Mail info@9xb.de, Haftung, geteilte Inhalte, Open-Source-Hinweis, Font-Awesome-Attribution.
+- [x] Datenschutzerklärung (Abschnitt auf `/imprint`): kein Server, keine Cookies, GitHub Pages Logfiles inkl. Hinweis auf Regelsatz-Daten in der URL, Local Storage (Verlauf/Favoriten, Spielstand, Sprache) nach § 25 TDDDG, Session Storage von SvelteKit, geteilte Links/QR, Betroffenenrechte. `/privacy` entfällt.
+- [ ] Sobald Local Storage tatsächlich genutzt wird (Phase 6): Schlüssel in `e2e/helpers.ts` (`ALLOWED_LOCAL_STORAGE_KEYS`) eintragen, der Test erzwingt die Übereinstimmung mit der Erklärung.
+- [x] About/Disclaimer zweisprachig unter `/about`, Abgrenzung auch im Impressum; Platzhalter ersetzt.
+- [x] Rechtsseiten auf Deutsch mit englischer Zusammenfassung, Footer-Links je Sprache, Rückverlinkung.
+- [x] `e2e/legal.spec.ts`: Pflichtangaben, keine Platzhalter, DDG statt TMG, Stand-Datum.
 
 ### Phase 4 – Sicherheit und Web-Best-Practices (1 Tag)
 
-- [ ] CSP: `kit.csp` in `svelte.config.js` mit `mode: 'hash'` (SvelteKit schreibt für vorgerenderte Seiten ein `<meta http-equiv>` mit Hashes, kein `unsafe-inline` nötig). Directives wie pdfshuffle: `default-src 'self'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `img-src 'self' data:` (QR-Code).
-- [ ] `<meta name="referrer" content="strict-origin-when-cross-origin">`, `lang` pro Sprache setzen (`%lang%`-Platzhalter in app.html + `transformPageChunk`).
-- [ ] Keine externen Ressourcen (Fonts, CDN, Analytics). Font Awesome: statt 66 kB CSS + 426 kB Fonts nur die ~6 benötigten Icons als inline SVG (oder `@fortawesome/*-svg-icons` tree-shaken).
-- [ ] Kein `{@html}` im Projekt; Lint-Regel/Test dagegen.
+- [x] CSP per `kit.csp` (`mode: 'hash'`) als Meta-Tag, ohne `unsafe-inline`/`unsafe-eval`. Einzige Ausnahme: `style-src-attr 'unsafe-hashes'` mit dem Hash des festen style-Attributs von SvelteKits `#svelte-announcer`; `test/csp.test.ts` prüft den Hash gegen die Kit-Quelle (schlägt bei Kit-Updates an).
+- [ ] WebKit meldet für jedes `<select>` unter `style-src 'self'` einen CSP-Verstoß seines internen Stylesheets (Browser-Eigenheit, in `e2e/helpers.ts` nur für WebKit ignoriert). Auf einem echten iPhone prüfen, ob `<select>` korrekt dargestellt wird; sonst in Phase 6 eigene Auswahl-Komponente statt `<select>`.
+- [x] Referrer-Policy-Meta, `lang` pro Sprache (Hook beim Prerendern, `$effect` bei Client-Navigation).
+- [x] Keine externen Ressourcen. Font Awesome entfernt, 8 Icons als Inline-SVG in `src/lib/icons.ts` + `Icon.svelte` (Build 1,3 MB → 0,3 MB).
+- [x] Kein `{@html}` im Projekt; ESLint-Regel `svelte/no-at-html-tags` (recommended) aktiv, E2E prüft auf Inline-Styles/-Handler im HTML.
 - [ ] Alle Eingaben aus URL und localStorage strikt validieren (Schema z. B. mit `valibot`/`zod` oder Hand-Parser): Typen, Wertebereiche (Handkarten 5–15, Farben 2–8, Level-Anzahl), Längenlimit für URL-Payload, Fallback auf Default bei Müll. Kein Absturz bei kaputtem localStorage (one-clue `security.test.js` als Vorlage).
 - [ ] QR-Code-Generierung lokal (z. B. `qrcode`-Paket, SVG-Ausgabe), keine externe API.
-- [ ] Viewport ohne `maximum-scale`/`user-scalable=no`; Zoom erlaubt.
-- [ ] 404-Seite (`+error.svelte` sauber) und `fallback`-Verhalten testen.
+- [x] Viewport ohne `maximum-scale`/`user-scalable=no` (per E2E abgesichert).
+- [x] `fallback: '404.html'`, Fehlerseite per E2E getestet.
 
 ### Phase 5 – Tests (1 Tag, parallel zu Features)
 
 - [ ] **Vitest** (Unit): Regelsatz-Modell, Serialisierung/Deserialisierung für Share-Links (Roundtrip), Validierung, Schwierigkeitsberechnung (Kombinatorik), Punktelogik.
-- [ ] **Playwright** (E2E gegen statischen Build, Chromium + WebKit): Startseite → Regelsatz anlegen → Teilen-Link → Link in neuem Context öffnen → Spiel spielbar; Sprachwechsel; Rechtsseiten erreichbar.
-- [ ] **Sicherheits-/Datenschutz-Tests** (Vorlage one-clue): kein Request verlässt die Origin, keine Cookies, exakt die dokumentierten localStorage-Keys, kaputter Storage stürzt nicht ab, CSP auf jeder Seite, keine Platzhalter im Impressum.
-- [ ] **Barrierefreiheit** mit `@axe-core/playwright` (wcag2a/aa, 2.1/2.2) auf allen Seiten.
-- [ ] **Markup/SEO**: Title, Description > 50 Zeichen, canonical, Manifest, Icons erreichbar, `main`-Landmark genau einmal.
+- [x] **Playwright** eingerichtet (Chromium, WebKit, Pixel-7-Emulation) gegen `build/`: alle Routen, Sprach-Redirect, Sprachwechsel, Kacheln → play/prepare, 404, Rechtsseiten.
+- [ ] Mit Phase 6 ergänzen: Regelsatz anlegen → Teilen-Link → in neuem Context öffnen → spielbar.
+- [x] **Sicherheits-/Datenschutz-Tests** (`e2e/privacy.spec.ts`): kein Request verlässt die Origin, keine Cookies, nur dokumentierte Local-/Session-Storage-Keys, CSP auf jeder Seite, keine Inline-Styles/-Handler.
+- [ ] Kaputter Local Storage stürzt nicht ab (sobald Storage genutzt wird, Phase 6).
+- [x] **Barrierefreiheit** mit `@axe-core/playwright` (wcag2a/aa, 2.1/2.2) auf allen Seiten; zwei Funde behoben (Sprachlink-Label, Select ohne Label).
+- [x] **Markup**: `main`-Landmark genau einmal, Titel je Seite.
+- [ ] **SEO**: Description auf allen Seiten > 50 Zeichen, canonical, Manifest/Icons (Phase 7).
 - [ ] Coverage für `src/lib` im CI ausgeben.
 
 ### Phase 6 – Spiel-Features (Kern; mehrere Tage)
