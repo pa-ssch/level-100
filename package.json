@@ -31,6 +31,7 @@
 		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/vite-plugin-svelte": "^5.1.1",
 		"@types/node": "^22",
+		"@types/qrcode": "^1.5.6",
 		"eslint": "^9.39.5",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.23.1",
@@ -44,5 +45,8 @@
 		"typescript-eslint": "^8.72.1",
 		"vite": "^6.4.5",
 		"vitest": "^4.1.12"
+	},
+	"dependencies": {
+		"qrcode": "^1.5.4"
 	}
 }

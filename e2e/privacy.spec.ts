@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ALLOWED_LOCAL_STORAGE_KEYS, ALLOWED_SESSION_STORAGE_KEYS, ROUTES } from './helpers';
+import { ALLOWED_LOCAL_STORAGE_KEYS, ALLOWED_SESSION_STORAGE_KEYS, ROUTES, watchErrors } from './helpers';
 
 // Was die Datenschutzerklärung verspricht, wird hier gegen das tatsächliche Verhalten geprüft.
 
@@ -14,7 +14,10 @@ test('kein Request verlässt die eigene Origin', async ({ page, baseURL }) => {
 		await page.waitForLoadState('networkidle');
 	}
 	await page.goto('/en-US/start');
-	await page.getByRole('button', { name: 'play' }).first().click();
+	await page.getByRole('link', { name: 'Play: Ten classic levels' }).click();
+	await page.getByRole('button', { name: 'Start game' }).click();
+	await page.getByRole('button', { name: 'Invite players' }).click();
+	await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();
 	await page.waitForLoadState('networkidle');
 	expect(foreign).toEqual([]);
 });
@@ -48,5 +51,36 @@ test('keine Inline-Styles oder -Event-Handler im ausgelieferten HTML', async ({ 
 		const html = await (await request.get(route)).text();
 		expect(html.match(/\sstyle\s*=\s*"/gi), `${route}: style-Attribut`).toBeNull();
 		expect(html.match(/\son[a-z]+\s*=\s*"/gi), `${route}: Inline-Event-Handler`).toBeNull();
+	}
+});
+
+test.describe('Kaputter Speicher stürzt nicht ab', () => {
+	const BAD = [
+		'null',
+		'5',
+		'{}',
+		'"text"',
+		'[1,2]',
+		'[null]',
+		'{kaputt',
+		'',
+		'[]',
+		JSON.stringify(Array(3000).fill('x')),
+		'{"v":1,"players":[]}'
+	];
+	for (const key of ALLOWED_LOCAL_STORAGE_KEYS) {
+		test(`${key}: Start- und Spielseite funktionieren trotzdem`, async ({ page, browserName }) => {
+			const errors = watchErrors(page, browserName);
+			await page.goto('/en-US/start');
+			for (const bad of BAD) {
+				await page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, bad]);
+				await page.goto('/en-US/start');
+				await expect(page.getByRole('link', { name: 'New ruleset' }), `${key}=${bad.slice(0, 20)}`).toBeVisible();
+				await page.goto('/en-US/play');
+				await expect(page.locator('main h1, main p').first(), `${key}=${bad.slice(0, 20)}`).toBeVisible();
+			}
+			expect(errors).toEqual([]);
+			await page.evaluate(() => localStorage.clear());
+		});
 	}
 });

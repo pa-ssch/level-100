@@ -1,6 +1,6 @@
 # Level 100 – Plan: Ziele und Todos bis zur Veröffentlichung
 
-Stand: 28.10.2026 (Phase 0 bis 5 im Kern umgesetzt und deployt; DNS für lvl100.de offen; Phase 6 Features als Nächstes). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
+Stand: 28.10.2026 (Phase 0 bis 6 umgesetzt und deployt; DNS für lvl100.de offen; Rest: Phase 7 Feinschliff/PWA und einzelne offene Punkte). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
 [pa-ssch/one-clue](https://github.com/pa-ssch/one-clue) und [pa-ssch/pdfshuffle](https://github.com/pa-ssch/pdfshuffle).
 
 ## Ziel
@@ -94,7 +94,7 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 
 - [x] Impressum unter `/imprint` nach one-clue-Vorbild (eine Seite mit Impressum und Datenschutz, Du-Form): Betreiber 9xb, Anschrift, E-Mail info@9xb.de, Haftung, geteilte Inhalte, Open-Source-Hinweis, Font-Awesome-Attribution.
 - [x] Datenschutzerklärung (Abschnitt auf `/imprint`): kein Server, keine Cookies, GitHub Pages Logfiles inkl. Hinweis auf Regelsatz-Daten in der URL, Local Storage (Verlauf/Favoriten, Spielstand, Sprache) nach § 25 TDDDG, Session Storage von SvelteKit, geteilte Links/QR, Betroffenenrechte. `/privacy` entfällt.
-- [ ] Sobald Local Storage tatsächlich genutzt wird (Phase 6): Schlüssel in `e2e/helpers.ts` (`ALLOWED_LOCAL_STORAGE_KEYS`) eintragen, der Test erzwingt die Übereinstimmung mit der Erklärung.
+- [x] Local-Storage-Schlüssel `level100.rulesets`, `level100.game`, `level100.language` in `e2e/helpers.ts`; der Test erzwingt die Übereinstimmung mit der Erklärung.
 - [x] About/Disclaimer zweisprachig unter `/about`, Abgrenzung auch im Impressum; Platzhalter ersetzt.
 - [x] Rechtsseiten auf Deutsch mit englischer Zusammenfassung, Footer-Links je Sprache, Rückverlinkung.
 - [x] `e2e/legal.spec.ts`: Pflichtangaben, keine Platzhalter, DDG statt TMG, Stand-Datum.
@@ -115,9 +115,9 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 
 - [ ] **Vitest** (Unit): Regelsatz-Modell, Serialisierung/Deserialisierung für Share-Links (Roundtrip), Validierung, Schwierigkeitsberechnung (Kombinatorik), Punktelogik.
 - [x] **Playwright** eingerichtet (Chromium, WebKit, Pixel-7-Emulation) gegen `build/`: alle Routen, Sprach-Redirect, Sprachwechsel, Kacheln → play/prepare, 404, Rechtsseiten.
-- [ ] Mit Phase 6 ergänzen: Regelsatz anlegen → Teilen-Link → in neuem Context öffnen → spielbar.
+- [x] `e2e/game.spec.ts`: Regelsatz anlegen → Teilen-Link → in neuem Context öffnen → spielen → Runden → Gewinner → Favorit/Kopie/Löschen; freier Modus.
 - [x] **Sicherheits-/Datenschutz-Tests** (`e2e/privacy.spec.ts`): kein Request verlässt die Origin, keine Cookies, nur dokumentierte Local-/Session-Storage-Keys, CSP auf jeder Seite, keine Inline-Styles/-Handler.
-- [ ] Kaputter Local Storage stürzt nicht ab (sobald Storage genutzt wird, Phase 6).
+- [x] Kaputter Local Storage stürzt nicht ab (je Schlüssel elf Müll-Varianten).
 - [x] **Barrierefreiheit** mit `@axe-core/playwright` (wcag2a/aa, 2.1/2.2) auf allen Seiten; zwei Funde behoben (Sprachlink-Label, Select ohne Label).
 - [x] **Markup**: `main`-Landmark genau einmal, Titel je Seite.
 - [ ] **SEO**: Description auf allen Seiten > 50 Zeichen, canonical, Manifest/Icons (Phase 7).
@@ -127,21 +127,24 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 
 Aus ToDo.txt und Kommentaren im Code:
 
-- [ ] **Domänenmodell nach `src/lib/`** verschieben (`Ruleset`, `CardDeck`, `Level`/Vertrag, Serialisierung, Validierung), nicht in `routes/`.
-- [ ] **Prepare-Seite**: Name, Kartendeck (Wertebereich 2–Ass bzw. 1–X, Farben, Joker ja/nein/Anzahl, eigene Sonderkarten wie „Aussetzen“), Handkarten pro Level, Level-Editor (Kombination aus Folge, Farbfolge, Gleiche, Full House, gerade/ungerade, … mit Anzahl), Modus `fixed` vs. „Kniffel“ (beim Rauskommen frei wählen).
-- [ ] **Schwierigkeit**: Anzahl möglicher Hände je Level berechnen (Kombinatorik: wie viele Karten braucht man und wie oft gibt es sie im Deck) → Schwierigkeit 1–10, Level danach sortierbar; höheres Level = mehr Karten zum Rauskommen.
-- [ ] **Teilen**: Regelsatz in URL kodieren, QR-Code anzeigen (Link auf `lvl100.de`), Hinweis wenn Link ungültig („hat jemand falsch geteilt?“).
-- [ ] **Play-Seite**: aktuelles Level je Spieler anzeigen (nur eigenes, nicht die folgenden), Punkte für mehrere Spieler erfassen, Level-Fortschritt, Spielstand in localStorage.
-- [ ] **Startseite**: „+ Neues Spiel“, History und Favoriten aus localStorage (statt Dummy-Daten), Kopieren über echten Zustand statt `copy<id>`-URL.
-- [ ] **i18n**: de-DE / en-US sauber (Übersetzungs-Tabelle in `src/lib/i18n`, Sprachwechsel im Footer funktionsfähig, Auswahl in localStorage).
-- [ ] Header: Zurück-Button auf prepare/play.
-- [ ] Spielbar mit normalen Spielkarten (2–Ass) als vordefiniertes Deck.
+- [x] **Domänenmodell in `src/lib/game/`**: `deck.ts`, `requirements.ts`, `solver.ts`, `difficulty.ts`, `ruleset.ts` (inkl. Validierung), `share.ts`, `game.ts`, `storage.ts`; jeweils mit Unit-Tests.
+- [x] **Prepare-Seite**: Name, Kartendeck (Vorlagen 1–12 / Pokerblatt oder eigenes Deck mit Wertebereich, Farben, Sätzen, Jokern), Handkarten je Level, Level-Editor mit Anforderungen (Gleiche Werte mit optional festem Wert, Folge, Farbfolge, eine Farbe, gerade/ungerade, Freitext), Modus „der Reihe nach“ vs. „frei wählbar“.
+- [ ] Eigene Sonderkarten (z. B. „Aussetzen“) als Deck-Option; derzeit nur über Freitext-Anforderung abbildbar.
+- [x] **Schwierigkeit** 1–10 je Level per Simulation (400 zufällige Starthände, Löser prüft Legbarkeit inkl. Joker), live im Editor; Handkarten je Level frei einstellbar.
+- [ ] Level nach Schwierigkeit sortieren (Button im Editor).
+- [x] **Teilen**: Regelsatz deflate-komprimiert und base64url in `?r=`, QR-Code lokal erzeugt (`qrcode`), Link-Kopieren; ungültige/überlange Links werden abgefangen.
+- [x] **Play-Seite**: Spieler anlegen, aktuelles Level je Spieler (bei „frei wählbar“ alle offenen), Runden mit „Level geschafft“ und Punkten, Rundenverlauf, Gewinner, Spielstand im Local Storage, Weiterspielen nach Neuladen, Einladen per QR.
+- [x] **Startseite**: „Neuer Regelsatz“, Verlauf und Favoriten aus Local Storage (beim ersten Start zwei Beispiele), Spielen/Bearbeiten/Kopieren/Teilen/Favorit/Löschen.
+- [x] **i18n**: Übersetzungstabelle in `src/lib/i18n.ts`, Level-Beschreibungen („Zwei Drillinge“, „Vierer-Farbfolge“), Sprachwechsel im Footer, Sprachwahl im Local Storage für den Root-Redirect.
+- [x] Header: Zurück-Button auf prepare/play.
+- [x] Pokerblatt (2–Ass) als Deck-Vorlage und Beispiel-Regelsatz.
 
 ### Phase 7 – Mobile, PWA, Feinschliff (1 Tag)
 
-- [ ] Responsives Layout (Tiles haben `min-width: 400px` → bricht auf Handys), 16 px Gutter, keine horizontale Scrollbar, Dark/Light über `prefers-color-scheme`.
+- [x] Responsives Layout (Flex-Wrap, 16 px Gutter), Dark/Light über `prefers-color-scheme`, `prefers-reduced-motion`.
+- [ ] Auf echten Geräten gegenprüfen (iPhone/Android), insbesondere Level-Editor und Rundeneingabe.
 - [ ] `manifest.webmanifest`, Icons (192/512/apple-touch), `theme-color`; optional Service Worker für Offline (dann Versions-Check wie `scripts/check-sw-version.js` in one-clue).
-- [ ] `prefers-reduced-motion` respektieren.
+- [x] `prefers-reduced-motion` respektieren.
 - [ ] Meta: Title/Description je Sprache, Open-Graph-Bild, `sitemap.xml`, `robots.txt`.
 - [ ] Lighthouse ≥ 90 in allen Kategorien als Abnahmekriterium.
 
@@ -150,6 +153,12 @@ Aus ToDo.txt und Kommentaren im Code:
 Phase 0 → 1 → 2 zuerst (danach deployt jeder Push auf `main` automatisch, auch wenn die App noch unfertig ist),
 dann Phase 3 + 4 (Rechtssicherheit und CSP vor der ersten Verlinkung an Freunde), dann Phase 5 + 6 iterativ
 (jedes Feature mit Tests), zum Schluss Phase 7.
+
+## Offene Punkte aus der Umsetzung
+
+- Der Löser (`solver.ts`) dient nur der Schwierigkeitsschätzung; in der App gibt es keine Karten, gespielt wird mit echten.
+- Kontaktadresse ist derzeit `info@9xb.de` (wie pdfshuffle); one-clue nutzt eine eigene Adresse (`1clue@9xb.de`). Bei Bedarf auf `lvl100@9xb.de` umstellen (Impressum, SECURITY.md, Test).
+- `structuredClone` verträgt keine Svelte-`$state`-Proxies: an der Grenze UI → Modell immer `$state.snapshot()` verwenden (siehe play/prepare).
 
 ## Definition of Done für „veröffentlicht“
 

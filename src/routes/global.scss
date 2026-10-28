@@ -1,6 +1,26 @@
-$background: rgb(20, 20, 20);
-$foreground: rgb(240, 240, 240);
-$foreground-accent: rgb(220, 220, 220);
+:root {
+	--background: rgb(20, 20, 20);
+	--surface: rgb(32, 32, 32);
+	--foreground: rgb(240, 240, 240);
+	--foreground-accent: rgb(200, 200, 200);
+	--border: rgb(90, 90, 90);
+	--accent: rgb(76, 175, 80);
+	--warn: rgb(255, 179, 71);
+	color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--background: rgb(250, 250, 250);
+		--surface: rgb(255, 255, 255);
+		--foreground: rgb(25, 25, 25);
+		--foreground-accent: rgb(70, 70, 70);
+		--border: rgb(190, 190, 190);
+		--accent: rgb(46, 125, 50);
+		--warn: rgb(176, 96, 0);
+		color-scheme: light;
+	}
+}
 
 /* Wrapper aus app.html; als Klasse statt style-Attribut, damit die CSP ohne unsafe-inline auskommt. */
 .app {
@@ -8,45 +28,114 @@ $foreground-accent: rgb(220, 220, 220);
 }
 
 body {
-	background-color: $background;
-	color: $foreground;
-	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-	margin: 0px;
-	border-color: $foreground;
+	background-color: var(--background);
+	color: var(--foreground);
+	font-family:
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		'Helvetica Neue',
+		Arial,
+		sans-serif;
+	margin: 0;
+	border-color: var(--foreground);
+	line-height: 1.4;
+}
 
-	a,
-	a:active,
-	a:visited {
-		color: $foreground;
-		text-decoration: none;
+a,
+a:active,
+a:visited {
+	color: var(--foreground);
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--foreground-accent);
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: var(--foreground);
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	padding: 6px 10px;
+}
+
+button {
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+
+	&:hover:not(:disabled) {
+		border-color: var(--foreground);
 	}
 
-	a:hover,
-	button:hover,
-	input[type='button']:hover {
-		color: $foreground-accent;
+	&:active:not(:disabled) {
+		transform: scale(0.97);
 	}
 
-	button:active,
-	input[type='button']:active {
-		transform: scale(0.9);
+	&:disabled {
+		opacity: 0.4;
+		cursor: default;
 	}
+}
 
-	button,
-	input[type='button'] {
-		cursor: pointer;
-		background-color: $background;
-		color: $foreground;
+button.primary {
+	background-color: var(--accent);
+	border-color: var(--accent);
+	color: white;
+	font-weight: bold;
+}
+
+button.secondary {
+	background: none;
+}
+
+button.icon-button {
+	border: none;
+	background: none;
+	padding: 6px;
+	font-size: 1.2em;
+}
+
+dialog {
+	background-color: var(--surface);
+	color: var(--foreground);
+	border: 1px solid var(--border);
+	padding: 20px;
+
+	&::backdrop {
+		background: rgba(0, 0, 0, 0.6);
 	}
+}
 
-	.noselect {
-		-webkit-touch-callout: none; /* iOS Safari */
-		-webkit-user-select: none; /* Safari */
-		-khtml-user-select: none; /* Konqueror HTML */
-		-moz-user-select: none; /* Old versions of Firefox */
-		-ms-user-select: none; /* Internet Explorer/Edge */
-		user-select: none; /* Non-prefixed version, currently
-									  supported by Chrome, Edge, Opera and Firefox */
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.noselect {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.warn-text {
+	color: var(--warn);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	button:active:not(:disabled) {
+		transform: none;
 	}
 }
 
@@ -54,14 +143,11 @@ body {
 .legal {
 	max-width: 72ch;
 	margin: 0 auto;
-	padding: 0 16px 32px;
+	padding: 0 0 32px;
 	line-height: 1.5;
 	text-align: left;
 
-	h1 {
-		margin-top: 1.5em;
-	}
-
+	h1,
 	h2 {
 		margin-top: 1.5em;
 	}
@@ -75,7 +161,7 @@ body {
 	}
 
 	.note {
-		border: 1px solid $foreground-accent;
+		border: 1px solid var(--border);
 		border-radius: 8px;
 		padding: 12px 16px;
 		margin-top: 1em;

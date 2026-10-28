@@ -3,10 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { detectLanguage } from '$lib/i18n';
+	import { loadLanguage } from '$lib/game/storage';
 
 	// Die Sprachweiche muss im Browser laufen: beim statischen Build gibt es keinen Server, der Accept-Language auswerten könnte.
 	onMount(() => {
-		goto(resolve('/[[language=language]]/start', { language: detectLanguage(navigator.language) }), { replaceState: true });
+		const language = loadLanguage() ?? detectLanguage(navigator.language);
+		goto(resolve('/[[language=language]]/start', { language }), { replaceState: true });
 	});
 </script>
 

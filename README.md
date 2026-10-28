@@ -25,12 +25,16 @@ yarn preview    # Build lokal ansehen
 
 ## Aufbau
 
-- `src/lib/` – Domänenmodell (Regelsatz, Kartendeck), i18n-Helfer, Tests daneben als `*.test.ts`
+- `src/lib/game/` – Domänenmodell: Deck, Level-Anforderungen, Löser (nur für die Schwierigkeitsschätzung per Simulation), Regelsatz mit
+  Validierung, Share-Link-Kodierung (deflate + base64url), Spielstand, Local Storage; Tests daneben als `*.test.ts`
+- `src/lib/i18n.ts` – Übersetzungen und lesbare Level-Beschreibungen; `src/lib/components/` – Level-Editor, Teilen-Dialog (QR)
 - `src/routes/[[language=language]]/` – Seiten je Sprache (`de-DE`, `en-US`): `start`, `prepare`, `play`
 - `src/routes/about|imprint|privacy` – Disclaimer, Impressum, Datenschutz
 - `e2e/` – Playwright-Tests gegen den statischen Build: Rendering, Barrierefreiheit (axe), CSP, keine fremden Requests, Impressum
 - `test/` – Tests für die Konfiguration (CSP-Hash)
 - `static/` – `CNAME`, `robots.txt`, Favicon
+
+Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.game` (laufendes Spiel), `level100.language`.
 
 Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Die Content-Security-Policy steht als Meta-Tag in jeder
 Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0). Spielzustand und geteilte Regelsätze leben
