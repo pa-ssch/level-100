@@ -1,6 +1,6 @@
 # Level 100 – Plan: Ziele und Todos bis zur Veröffentlichung
 
-Stand: 28.10.2026 (Phase 0 und 1 lokal umgesetzt, DNS/Repo-Settings offen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
+Stand: 28.10.2026 (Phase 0, 1 und 2 umgesetzt und deployt; DNS für lvl100.de offen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
 [pa-ssch/one-clue](https://github.com/pa-ssch/one-clue) und [pa-ssch/pdfshuffle](https://github.com/pa-ssch/pdfshuffle).
 
 ## Ziel
@@ -73,17 +73,18 @@ mit Tests und automatischem Deploy. Qualitätsmaßstab: der Stand von one-clue /
 - [x] `@sveltejs/adapter-static` statt adapter-auto; `export const prerender = true` im Root-Layout; ggf. `trailingSlash: 'always'` (GitHub Pages liefert `/pfad/index.html`).
 - [x] Root-Redirect (`/` → Sprache) clientseitig in `+page.svelte` mit `onMount`, nicht im `load`. Alternativ `/` als Startseite mit Sprachwahl.
 - [x] `static/CNAME` mit `lvl100.de`; `static/robots.txt`; `.nojekyll` in `static/` (Adapter erzeugt es nicht).
-- [ ] DNS beim Registrar: A/AAAA-Records auf GitHub Pages, `www` als CNAME; in den Repo-Settings Custom Domain + „Enforce HTTPS“.
+- [ ] DNS beim Registrar (netcup): A-Records `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` und AAAA `2606:50c0:8000::153` bis `::8003::153` für `lvl100.de`, `www` als CNAME auf `pa-ssch.github.io`. Stand 28.10.2026 zeigt `lvl100.de` noch auf den netcup-Domainpark (46.38.243.234). Danach in den Repo-Settings „Enforce HTTPS“ aktivieren.
 - [ ] `phase100.de` → 301 auf `lvl100.de` beim Registrar.
-- [ ] Repo auf GitHub öffentlich machen (Voraussetzung für Pages im Free-Plan) oder Pages im Pro-Plan nutzen.
+- [x] Repo auf GitHub öffentlich; Pages per Workflow aktiviert, `pa-ssch.github.io/level-100` leitet auf `lvl100.de` um.
 
 ### Phase 2 – CI/CD (½ Tag)
 
 Vorlage: `.github/workflows/ci.yml` aus pdfshuffle (Lint → Typecheck → Unit → Build → E2E → Upload Pages Artifact → Deploy nur auf `main`).
 
-- [ ] Workflow mit auf SHA gepinnten Actions (checkout, setup-node, upload-pages-artifact, deploy-pages), `permissions: contents: read`, `concurrency`, `timeout-minutes`.
-- [ ] Schritte: `yarn install --immutable`, `yarn npm audit --severity high`, `yarn lint`, `yarn check`, `yarn test`, `yarn build`, Playwright e2e gegen `build/`, Playwright-Report als Artifact bei Fehler.
-- [ ] `.github/dependabot.yml` für npm und github-actions (wöchentlich, gruppiert).
+- [x] Workflow mit auf SHA gepinnten Actions (checkout, setup-node, upload-pages-artifact, deploy-pages), `permissions: contents: read`, `concurrency`, `timeout-minutes`.
+- [x] Schritte: `yarn install --immutable`, `yarn npm audit --severity high`, `yarn lint`, `yarn check`, `yarn test`, `yarn build`, Upload + Deploy. Erster Lauf grün (28.10.2026).
+- [ ] Playwright e2e gegen `build/` ergänzen, Playwright-Report als Artifact bei Fehler (mit Phase 5).
+- [x] `.github/dependabot.yml` für npm und github-actions (wöchentlich, gruppiert).
 - [ ] Branch-Protection auf `main`: CI muss grün sein.
 - [ ] Optional (wie one-clue `live-check.yml`): nächtlicher Live-Check der veröffentlichten Seite (HTTPS, Zertifikat, Seite lädt fehlerfrei).
 
