@@ -2,6 +2,11 @@ $background: rgb(20, 20, 20);
 $foreground: rgb(240, 240, 240);
 $foreground-accent: rgb(220, 220, 220);
 
+/* Wrapper aus app.html; als Klasse statt style-Attribut, damit die CSP ohne unsafe-inline auskommt. */
+.app {
+	display: contents;
+}
+
 body {
 	background-color: $background;
 	color: $foreground;

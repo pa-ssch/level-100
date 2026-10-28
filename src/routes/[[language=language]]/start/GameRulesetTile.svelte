@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import type { ResolvedPathname } from '$app/types';
 	import type { Ruleset } from '$lib/ruleset';
+	import Icon from '$lib/Icon.svelte';
 
 	let { ruleset }: { ruleset?: Ruleset } = $props();
 
@@ -37,10 +38,10 @@
 	<h3 class="noselect">{ruleset?.name ?? 'New custom game'}</h3>
 
 	{#if ruleset}
-		<button onclick={edit} aria-label="edit" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-		<button onclick={copy} aria-label="copy" title="Copy"><i class="fa-solid fa-clone"></i></button>
+		<button onclick={edit} aria-label="edit" title="Edit"><Icon name="pen-to-square" /></button>
+		<button onclick={copy} aria-label="copy" title="Copy"><Icon name="clone" /></button>
 	{/if}
-	<button onclick={start} aria-label="play" title="Start"><i class="fa-solid fa-play"></i></button>
+	<button onclick={start} aria-label="play" title="Start"><Icon name="play" /></button>
 </div>
 
 <style lang="scss">

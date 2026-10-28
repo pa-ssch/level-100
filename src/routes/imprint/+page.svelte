@@ -62,17 +62,18 @@
 
 	<h3>Haftung für Links</h3>
 	<p>
-		Diese Seite enthält Links zu externen Webseiten Dritter (derzeit nur zum Quelltext auf GitHub und zur Datenschutzerklärung von GitHub),
-		auf deren Inhalte wir keinen Einfluss haben. Für diese fremden Inhalte übernehmen wir keine Gewähr; verantwortlich ist stets der
-		jeweilige Anbieter oder Betreiber der Seiten. Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar. Bei Bekanntwerden von
-		Rechtsverletzungen entfernen wir solche Links umgehend.
+		Diese Seite enthält Links zu externen Webseiten Dritter (derzeit nur zum Quelltext auf GitHub, zu Font Awesome und zur
+		Datenschutzerklärung von GitHub), auf deren Inhalte wir keinen Einfluss haben. Für diese fremden Inhalte übernehmen wir keine Gewähr;
+		verantwortlich ist stets der jeweilige Anbieter oder Betreiber der Seiten. Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße
+		erkennbar. Bei Bekanntwerden von Rechtsverletzungen entfernen wir solche Links umgehend.
 	</p>
 
 	<h3>Urheberrecht</h3>
 	<p>
 		Der Quelltext dieser Seite ist unter der MIT-Lizenz veröffentlicht:
 		<a href="https://github.com/pa-ssch/level-100" rel="noopener">github.com/pa-ssch/level-100</a>. Die durch den Seitenbetreiber erstellten
-		Inhalte und Werke unterliegen dem deutschen Urheberrecht.
+		Inhalte und Werke unterliegen dem deutschen Urheberrecht. Die Symbole stammen aus
+		<a href="https://fontawesome.com" rel="noopener">Font Awesome Free</a> (Lizenz CC BY 4.0).
 	</p>
 
 	<h1 id="datenschutz">Datenschutzerklärung</h1>
@@ -107,6 +108,11 @@
 		oder geöffnet hast (Verlauf und Favoriten), den Spielstand der laufenden Partie mit den von dir eingetragenen Spielernamen und Punkten sowie
 		deine Sprachwahl. Diese Daten bleiben auf deinem Gerät, werden nicht an uns oder Dritte übermittelt und sind für die Funktion der Anwendung
 		erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Du kannst sie jederzeit über die Website-Einstellungen deines Browsers löschen.
+	</p>
+	<p>
+		Zusätzlich merkt sich die Seite im <b>Session Storage</b> deines Browsers die Scrollposition und den Navigationsverlauf innerhalb der App,
+		damit die Zurück-Taste wie gewohnt funktioniert. Diese technischen Einträge enthalten keine personenbezogenen Daten und werden gelöscht, sobald
+		du den Browser-Tab schließt.
 	</p>
 
 	<h2>Geteilte Links und QR-Codes</h2>

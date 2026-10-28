@@ -21,6 +21,7 @@
 
 <p>Prepare ruleset {rulesetId ?? '(new)'}</p>
 
+<label for="level">Level</label>
 <select name="level" id="level">
 	<optgroup label="Folge">
 		<option value="dreierfolge">Dreierfolge</option>

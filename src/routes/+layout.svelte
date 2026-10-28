@@ -3,10 +3,16 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import type { ResolvedPathname } from '$app/types';
-	import { footerLabel, isLanguage, otherLanguage } from '$lib/i18n';
+	import { fixedRouteLanguages, footerLabel, htmlLang, isLanguage, otherLanguage } from '$lib/i18n';
+	import Icon from '$lib/Icon.svelte';
 	import './global.scss';
 
 	let { children } = $props();
+
+	// Beim Prerendern setzt hooks.server.ts das lang-Attribut; bei Client-Navigation muss es nachgezogen werden.
+	$effect(() => {
+		document.documentElement.lang = htmlLang(page.params.language ?? fixedRouteLanguages[page.route.id ?? '']);
+	});
 
 	// Link auf dieselbe Seite in der jeweils anderen Sprache.
 	let languageSwitch = $derived.by(() => {
@@ -15,6 +21,7 @@
 		const target = otherLanguage(current);
 		return {
 			label: target === 'de-DE' ? 'Deutsch' : 'English',
+			hreflang: target,
 			// Suchparameter gibt es erst im Browser; beim Prerendern ist der Zugriff darauf nicht erlaubt.
 			// Der Pfad ist bereits aufgelöst (er stammt aus page.url), nur die Sprache wird getauscht.
 			href: (page.url.pathname.replace(`/${current}`, `/${target}`) + (browser ? page.url.search : '')) as ResolvedPathname
@@ -39,7 +46,7 @@
 		</div>
 		<div class="right">
 			{#if languageSwitch}
-				<a href={languageSwitch.href} aria-label="Change language"><i class="fa-solid fa-language"></i> {languageSwitch.label}</a>
+				<a href={languageSwitch.href} hreflang={languageSwitch.hreflang}><Icon name="language" /> {languageSwitch.label}</a>
 			{/if}
 		</div>
 	</footer>
