@@ -1,35 +1,34 @@
-import { v7 as uuid } from 'uuid';
-
-type cardValueRange = 'infinite' | 10 | 11 | 12 | 13 | 14 | 15;
-type distinctColors = 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type CardValueRange = 'infinite' | 10 | 11 | 12 | 13 | 14 | 15;
+export type SuitCount = 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type HandCardCount = 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
+export type LevelSelectionMode = 'fixed';
 
 export class CardDeck {
 	constructor(
-		public cardValueRange: cardValueRange = 12,
-		public suitCount: distinctColors = 4
+		public cardValueRange: CardValueRange = 12,
+		public suitCount: SuitCount = 4
 	) {}
 }
-
-type handCardCount = 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
 
 export class Ruleset {
 	constructor(
 		public name: string = 'New Game',
-		public id: string = uuid(),
+		public id: string = crypto.randomUUID(),
 		public cardDeck: CardDeck = new CardDeck(),
-		public handCardCountPerLevel: [handCardCount, handCardCount, ...handCardCount[]] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
-		public levelsSelectionMode: 'fixed' = 'fixed'
+		public handCardCountPerLevel: [HandCardCount, HandCardCount, ...HandCardCount[]] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+		public levelsSelectionMode: LevelSelectionMode = 'fixed'
 	) {}
 
-	copy() {
+	/** Kopie mit neuer ID und Standardnamen; die Regeln selbst werden tief kopiert. */
+	copy(): Ruleset {
 		return new Ruleset(
 			undefined,
 			undefined,
-			structuredClone(this.cardDeck),
-			structuredClone(this.handCardCountPerLevel),
-			structuredClone(this.levelsSelectionMode)
+			new CardDeck(this.cardDeck.cardValueRange, this.cardDeck.suitCount),
+			[...this.handCardCountPerLevel],
+			this.levelsSelectionMode
 		);
 	}
 }
 
-// joker amount, special cards, card counts only if you can play it here
+// Offen (siehe PLAN.md, Phase 6): Joker-Anzahl, Sonderkarten, Level-Definitionen, Serialisierung für Share-Links.

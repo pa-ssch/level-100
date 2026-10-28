@@ -1,22 +1,33 @@
 <script lang="ts">
-	import { Ruleset } from './ruleset.data';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import type { ResolvedPathname } from '$app/types';
+	import type { Ruleset } from '$lib/ruleset';
 
 	let { ruleset }: { ruleset?: Ruleset } = $props();
 
+	let language = $derived(page.params.language);
+
+	// resolve() kennt keine Query-Parameter; der Pfad selbst ist aufgelöst, daher ist der Typ hier korrekt.
+	function href(route: '/[[language=language]]/play' | '/[[language=language]]/prepare', query?: Record<string, string>): ResolvedPathname {
+		const search = query ? '?' + new URLSearchParams(query).toString() : '';
+		return (resolve(route, { language }) + search) as ResolvedPathname;
+	}
+
 	function start(event: MouseEvent) {
 		event.stopPropagation();
-		goto(`./play/${ruleset?.id ?? 'new'}`);
+		goto(ruleset ? href('/[[language=language]]/play', { r: ruleset.id }) : href('/[[language=language]]/prepare'));
 	}
 
 	function edit(event: MouseEvent) {
 		event.stopPropagation();
-		goto(`./prepare/${ruleset!.id}`);
+		if (ruleset) goto(href('/[[language=language]]/prepare', { r: ruleset.id }));
 	}
 
 	function copy(event: MouseEvent) {
 		event.stopPropagation();
-		goto(`./prepare/copy${ruleset!.id}`);
+		if (ruleset) goto(href('/[[language=language]]/prepare', { r: ruleset.id, copy: '1' }));
 	}
 </script>
 
@@ -39,13 +50,12 @@
 		margin: 10px;
 		border-radius: 10px;
 		max-width: 800px;
-		min-width: 400px;
 		display: grid;
 		grid-template-columns: 1fr auto auto auto;
 
 		button {
-			border: None;
-			background: None;
+			border: none;
+			background: none;
 			font-size: 2em;
 		}
 	}

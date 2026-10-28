@@ -1,18 +1,26 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import { sveltePreprocess } from 'svelte-preprocess';
+
+const languages = ['de-DE', 'en-US'];
+const pages = ['start', 'prepare', 'play'];
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	// Consult https://svelte.dev/docs/kit/integrations
-	// for more information about preprocessors
-	preprocess: sveltePreprocess({ script: true }),
+	preprocess: vitePreprocess(),
 
 	kit: {
-		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
-		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
-		adapter: adapter()
+		// Statischer Export für GitHub Pages: alle Seiten werden zur Build-Zeit vorgerendert.
+		adapter: adapter({
+			pages: 'build',
+			assets: 'build',
+			fallback: undefined,
+			precompress: false,
+			strict: true
+		}),
+		prerender: {
+			// Die Sprach-Routen sind über den optionalen Parameter nicht per Crawling auffindbar.
+			entries: ['*', ...languages.flatMap((lang) => pages.map((page) => `/${lang}/${page}`))]
+		}
 	}
 };
 

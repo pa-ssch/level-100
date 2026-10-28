@@ -1,41 +1,53 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
+	import type { ResolvedPathname } from '$app/types';
+	import { isLanguage, otherLanguage } from '$lib/i18n';
+	import './global.scss';
+
 	let { children } = $props();
 
-	function changeLanguage(e: MouseEvent) {
-		alert('change language');
-		console.log(e);
-	}
+	// Link auf dieselbe Seite in der jeweils anderen Sprache.
+	let languageSwitch = $derived.by(() => {
+		const current = page.params.language;
+		if (!isLanguage(current)) return undefined;
+		const target = otherLanguage(current);
+		return {
+			label: target === 'de-DE' ? 'Deutsch' : 'English',
+			// Suchparameter gibt es erst im Browser; beim Prerendern ist der Zugriff darauf nicht erlaubt.
+			// Der Pfad ist bereits aufgelöst (er stammt aus page.url), nur die Sprache wird getauscht.
+			href: (page.url.pathname.replace(`/${current}`, `/${target}`) + (browser ? page.url.search : '')) as ResolvedPathname
+		};
+	});
 </script>
 
 <div class="page">
 	<nav class="header">
-		<a class="noselect" href="/">Level 100!</a>
-		<!-- Wenn ich bei play oder prepare bin gibts oben nen zurück knopf. Header ist wie bei youtube music.  -->
+		<a class="noselect" href={resolve('/')}>Level 100!</a>
+		<!-- TODO (PLAN.md Phase 6): Zurück-Button auf prepare/play, Header wie bei YouTube Music -->
 	</nav>
 
-	<div class="content">
+	<main class="content">
 		{@render children()}
-	</div>
+	</main>
 
 	<footer class="footer">
-		<!-- disclaimer shown here -->
+		<!-- TODO (PLAN.md Phase 3): Disclaimer hier anzeigen -->
 		<div class="left">
-			<a href="/about">About</a>
-			<a href="/imprint">Imprint</a>
-			<a href="/privacy">Privacy</a>
+			<a href={resolve('/about')}>About</a>
+			<a href={resolve('/imprint')}>Imprint</a>
+			<a href={resolve('/privacy')}>Privacy</a>
 		</div>
 		<div class="right">
-			<button aria-label="Change Language" onclick={changeLanguage}>
-				<i class="fa-solid fa-language"> </i>change language
-			</button>
-			<button>test</button>
-			<input type="button" value="kljkjl" />
+			{#if languageSwitch}
+				<a href={languageSwitch.href} aria-label="Change language"><i class="fa-solid fa-language"></i> {languageSwitch.label}</a>
+			{/if}
 		</div>
 	</footer>
 </div>
 
-<style>
-	@import './global.scss';
+<style lang="scss">
 	.page {
 		display: grid;
 		min-height: calc(100vh - 16px);
@@ -57,9 +69,10 @@
 			display: grid;
 			justify-items: center;
 			align-items: center;
-			margin: 0px 50px;
-			grid-template-columns: 1fr, 1fr;
+			margin: 0 50px;
+			grid-template-columns: 1fr 1fr;
 			grid-template-areas: 'left right';
+
 			.left,
 			.right {
 				display: flex;

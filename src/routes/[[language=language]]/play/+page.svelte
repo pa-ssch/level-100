@@ -1,15 +1,25 @@
-<p>
-	<!-- Wenn parameter da sind, dann anzeigen, berechnen der punkte oder was auch immer. qr code anzeigen um andere einzuladen wenn niht, schreiben,
-dass man ein spiel über nen link öffnen soll oder qr code scannen. /sprache/play (level anzeigen + punkte eintragen); code scannen oder plan
-öffnen level100.de/de-DE/play?1&2&3&4=11&5=Ein vierling und ein Affe&6 -->
-</p>
+<script lang="ts">
+	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 
-<h1>Gamemodes:</h1>
-<p>
-	<!-- * man sieht immer nur seine aktuelle level, aber nicht die folgenden
-    * man kann level tauschen, indem man Punkte aufnimmt -->
-</p>
+	// Query-Parameter gibt es erst im Browser; beim Prerendern ist die URL ohne Suchparameter.
+	let rulesetId = $derived(browser ? page.url.searchParams.get('r') : null);
+</script>
 
-<!-- if no params nav to prepare -->
+<svelte:head>
+	<title>Play – Level 100</title>
+</svelte:head>
 
-<!-- wenn zu  id nix da ist, hat eventuell ein spieler das falsch geteilt? -->
+<!--
+	Wenn Parameter da sind: Level anzeigen, Punkte eintragen, QR-Code zum Einladen anzeigen.
+	Wenn nicht: Hinweis, ein Spiel über einen Link zu öffnen oder einen QR-Code zu scannen (ggf. falsch geteilt?).
+	Gamemodes:
+	- man sieht immer nur sein aktuelles Level, nicht die folgenden
+	- man kann Level tauschen, indem man Punkte aufnimmt
+-->
+
+{#if rulesetId}
+	<p>Playing ruleset {rulesetId}</p>
+{:else}
+	<p>No game selected. Open a shared link or scan a QR code.</p>
+{/if}
