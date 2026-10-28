@@ -1,38 +1,42 @@
-# sv
+# Level 100
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Regelsätze für Kartenspiele der „Stufen“-Art selbst zusammenstellen, per Link oder QR-Code mit Freunden teilen und
+gemeinsam spielen. Level 100 ist eine rein clientseitige Web-App: kein Backend, keine Konten, keine Cookies, kein Tracking.
 
-## Creating a project
+Live: [lvl100.de](https://lvl100.de) (GitHub Pages)
 
-If you're seeing this, you've probably already done this step. Congrats!
+Level 100 ist ein eigenständiges Projekt und steht in keiner Verbindung zu „Phase 10“, „Stufe 10“, Contract Rummy oder
+deren Rechteinhabern.
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Entwicklung
 
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Voraussetzung: Node 22 (siehe `.nvmrc`) und Yarn 4 (`corepack enable`).
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+yarn install
+yarn dev        # Dev-Server mit Hot Reload
+yarn check      # Typen und Svelte-Diagnose
+yarn lint       # Prettier und ESLint
+yarn test       # Unit-Tests (Vitest)
+yarn build      # Statischer Export nach build/
+yarn preview    # Build lokal ansehen
 ```
 
-## Building
+## Aufbau
 
-To create a production version of your app:
+- `src/lib/` – Domänenmodell (Regelsatz, Kartendeck), i18n-Helfer, Tests daneben als `*.test.ts`
+- `src/routes/[[language=language]]/` – Seiten je Sprache (`de-DE`, `en-US`): `start`, `prepare`, `play`
+- `src/routes/about|imprint|privacy` – Disclaimer, Impressum, Datenschutz
+- `static/` – `CNAME`, `robots.txt`, Favicon
 
-```bash
-npm run build
-```
+Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Spielzustand und geteilte Regelsätze leben
+ausschließlich in der URL und im `localStorage` des Browsers.
 
-You can preview the production build with `npm run preview`.
+## Deployment
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Jeder Push auf `main` baut und veröffentlicht die Seite per GitHub Actions auf GitHub Pages (siehe `.github/workflows/`).
+Der Fahrplan bis zur Veröffentlichung steht in [PLAN.md](PLAN.md).
+
+## Lizenz
+
+[MIT](LICENSE)
