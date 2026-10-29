@@ -32,7 +32,8 @@ yarn preview    # Build lokal ansehen
 - `src/routes/about|imprint|privacy` – Disclaimer, Impressum, Datenschutz
 - `e2e/` – Playwright-Tests gegen den statischen Build: Rendering, Barrierefreiheit (axe), CSP, keine fremden Requests, Impressum
 - `test/` – Tests für die Konfiguration (CSP-Hash)
-- `static/` – `CNAME`, `robots.txt`, Favicon
+- `src/lib/site.ts`, `src/lib/seo.ts`, `src/lib/components/Seo.svelte` – Site-Konstanten, JSON-LD, Meta-Tags (canonical, hreflang, Open Graph)
+- `static/` – `CNAME`, `robots.txt`, `llms.txt`, `manifest.webmanifest`, Icons (`icons/icon.svg` ist die Quelle der PNGs)
 
 Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.game` (laufendes Spiel), `level100.language`.
 

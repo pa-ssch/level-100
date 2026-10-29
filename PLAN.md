@@ -1,6 +1,6 @@
 # Level 100 – Plan: Ziele und Todos bis zur Veröffentlichung
 
-Stand: 28.10.2026 (Phase 0 bis 6 umgesetzt und deployt; DNS für lvl100.de offen; Rest: Phase 7 Feinschliff/PWA und einzelne offene Punkte). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
+Stand: 29.10.2026 (Phase 0 bis 7 umgesetzt und deployt; DNS für lvl100.de offen; Restpunkte siehe unerledigte Kästchen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
 [pa-ssch/one-clue](https://github.com/pa-ssch/one-clue) und [pa-ssch/pdfshuffle](https://github.com/pa-ssch/pdfshuffle).
 
 ## Ziel
@@ -120,7 +120,7 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 - [x] Kaputter Local Storage stürzt nicht ab (je Schlüssel elf Müll-Varianten).
 - [x] **Barrierefreiheit** mit `@axe-core/playwright` (wcag2a/aa, 2.1/2.2) auf allen Seiten; zwei Funde behoben (Sprachlink-Label, Select ohne Label).
 - [x] **Markup**: `main`-Landmark genau einmal, Titel je Seite.
-- [ ] **SEO**: Description auf allen Seiten > 50 Zeichen, canonical, Manifest/Icons (Phase 7).
+- [x] **SEO**: `e2e/seo.spec.ts` prüft Description > 50 Zeichen, canonical, hreflang, Open Graph, JSON-LD, Manifest/Icons, Sitemap, robots, llms.txt.
 - [ ] Coverage für `src/lib` im CI ausgeben.
 
 ### Phase 6 – Spiel-Features (Kern; mehrere Tage)
@@ -143,10 +143,13 @@ Aus ToDo.txt und Kommentaren im Code:
 
 - [x] Responsives Layout (Flex-Wrap, 16 px Gutter), Dark/Light über `prefers-color-scheme`, `prefers-reduced-motion`.
 - [ ] Auf echten Geräten gegenprüfen (iPhone/Android), insbesondere Level-Editor und Rundeneingabe.
-- [ ] `manifest.webmanifest`, Icons (192/512/apple-touch), `theme-color`; optional Service Worker für Offline (dann Versions-Check wie `scripts/check-sw-version.js` in one-clue).
+- [x] `manifest.webmanifest`, Icons (SVG + 192/512/apple-touch/favicon, aus `static/icons/icon.svg` gerendert), `theme-color`.
+- [ ] Optional Service Worker für Offline (dann Versions-Check wie `scripts/check-sw-version.js` in one-clue).
 - [x] `prefers-reduced-motion` respektieren.
-- [ ] Meta: Title/Description je Sprache, Open-Graph-Bild, `sitemap.xml`, `robots.txt`.
-- [ ] Lighthouse ≥ 90 in allen Kategorien als Abnahmekriterium.
+- [x] Meta je Sprache über `Seo.svelte`: Title, Description, canonical, hreflang (de/en/x-default), Open Graph + Twitter Card mit `og-image.png`, `sitemap.xml` (prerendered Endpoint mit hreflang), `robots.txt` mit Sitemap.
+- [x] **LLM-Optimierung**: `llms.txt` (englisch + deutsch, Funktionsumfang, Seiten, technische Fakten, Kontakt), JSON-LD `WebApplication` per Hook in jeder Seite (+ `AboutPage`/`WebPage` auf about/imprint), robots.txt erlaubt alle Crawler ausdrücklich, semantische Landmarks (nav/main/footer).
+- [ ] Nach DNS: Seite in Google Search Console und Bing Webmaster Tools anmelden, Sitemap einreichen; OG-Vorschau mit einem Link-Debugger prüfen.
+- [ ] Lighthouse ≥ 90 in allen Kategorien als Abnahmekriterium (nach DNS gegen die Live-Seite laufen lassen).
 
 ## Reihenfolge-Empfehlung
 
@@ -157,7 +160,7 @@ dann Phase 3 + 4 (Rechtssicherheit und CSP vor der ersten Verlinkung an Freunde)
 ## Offene Punkte aus der Umsetzung
 
 - Der Löser (`solver.ts`) dient nur der Schwierigkeitsschätzung; in der App gibt es keine Karten, gespielt wird mit echten.
-- Kontaktadresse ist derzeit `lvl100@9xb.de` (wie pdfshuffle); one-clue nutzt eine eigene Adresse (`1clue@9xb.de`). Bei Bedarf auf `lvl100@9xb.de` umstellen (Impressum, SECURITY.md, Test).
+- Kontaktadresse ist `lvl100@9xb.de` (Impressum, SECURITY.md, llms.txt, JSON-LD); das Postfach muss bei 9xb existieren.
 - `structuredClone` verträgt keine Svelte-`$state`-Proxies: an der Grenze UI → Modell immer `$state.snapshot()` verwenden (siehe play/prepare).
 
 ## Definition of Done für „veröffentlicht“
