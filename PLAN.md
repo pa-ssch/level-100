@@ -106,14 +106,14 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 - [x] Referrer-Policy-Meta, `lang` pro Sprache (Hook beim Prerendern, `$effect` bei Client-Navigation).
 - [x] Keine externen Ressourcen. Font Awesome entfernt, 8 Icons als Inline-SVG in `src/lib/icons.ts` + `Icon.svelte` (Build 1,3 MB → 0,3 MB).
 - [x] Kein `{@html}` im Projekt; ESLint-Regel `svelte/no-at-html-tags` (recommended) aktiv, E2E prüft auf Inline-Styles/-Handler im HTML.
-- [ ] Alle Eingaben aus URL und localStorage strikt validieren (Schema z. B. mit `valibot`/`zod` oder Hand-Parser): Typen, Wertebereiche (Handkarten 5–15, Farben 2–8, Level-Anzahl), Längenlimit für URL-Payload, Fallback auf Default bei Müll. Kein Absturz bei kaputtem localStorage (one-clue `security.test.js` als Vorlage).
-- [ ] QR-Code-Generierung lokal (z. B. `qrcode`-Paket, SVG-Ausgabe), keine externe API.
+- [x] Alle Eingaben aus URL und Local Storage strikt validiert (Hand-Parser in `ruleset.ts`/`storage.ts`): Typen, Wertebereiche, Längenlimits für URL-Payload (4000 Zeichen, 64 KB dekomprimiert), Fallback bei Müll; E2E-Test mit kaputtem Storage.
+- [x] QR-Code-Generierung lokal (`qrcode`-Paket, PNG-Data-URL, `img-src data:` in der CSP), keine externe API.
 - [x] Viewport ohne `maximum-scale`/`user-scalable=no` (per E2E abgesichert).
 - [x] `fallback: '404.html'`, Fehlerseite per E2E getestet.
 
 ### Phase 5 – Tests (1 Tag, parallel zu Features)
 
-- [ ] **Vitest** (Unit): Regelsatz-Modell, Serialisierung/Deserialisierung für Share-Links (Roundtrip), Validierung, Schwierigkeitsberechnung (Kombinatorik), Punktelogik.
+- [x] **Vitest** (Unit): Deck, Löser, Schwierigkeit, Regelsatz-Validierung, Share-Link-Roundtrip, Spiellogik, i18n, CSP-Hash, JSON-LD (29 Tests).
 - [x] **Playwright** eingerichtet (Chromium, WebKit, Pixel-7-Emulation) gegen `build/`: alle Routen, Sprach-Redirect, Sprachwechsel, Kacheln → play/prepare, 404, Rechtsseiten.
 - [x] `e2e/game.spec.ts`: Regelsatz anlegen → Teilen-Link → in neuem Context öffnen → spielen → Runden → Gewinner → Favorit/Kopie/Löschen; freier Modus.
 - [x] **Sicherheits-/Datenschutz-Tests** (`e2e/privacy.spec.ts`): kein Request verlässt die Origin, keine Cookies, nur dokumentierte Local-/Session-Storage-Keys, CSP auf jeder Seite, keine Inline-Styles/-Handler.
