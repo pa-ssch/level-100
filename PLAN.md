@@ -92,7 +92,7 @@ Vorlage: `.github/workflows/ci.yml` aus pdfshuffle (Lint → Typecheck → Unit 
 
 Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben nach § 5 DDG, § 18 MStV, VSBG, GitHub-Pages-Hosting, DPF, Aufsichtsbehörde BW, Stand-Datum).
 
-- [x] Impressum unter `/imprint` nach one-clue-Vorbild (eine Seite mit Impressum und Datenschutz, Du-Form): Betreiber 9xb, Anschrift, E-Mail info@9xb.de, Haftung, geteilte Inhalte, Open-Source-Hinweis, Font-Awesome-Attribution.
+- [x] Impressum unter `/imprint` nach one-clue-Vorbild (eine Seite mit Impressum und Datenschutz, Du-Form): Betreiber 9xb, Anschrift, E-Mail lvl100@9xb.de, Haftung, geteilte Inhalte, Open-Source-Hinweis, Font-Awesome-Attribution.
 - [x] Datenschutzerklärung (Abschnitt auf `/imprint`): kein Server, keine Cookies, GitHub Pages Logfiles inkl. Hinweis auf Regelsatz-Daten in der URL, Local Storage (Verlauf/Favoriten, Spielstand, Sprache) nach § 25 TDDDG, Session Storage von SvelteKit, geteilte Links/QR, Betroffenenrechte. `/privacy` entfällt.
 - [x] Local-Storage-Schlüssel `level100.rulesets`, `level100.game`, `level100.language` in `e2e/helpers.ts`; der Test erzwingt die Übereinstimmung mit der Erklärung.
 - [x] About/Disclaimer zweisprachig unter `/about`, Abgrenzung auch im Impressum; Platzhalter ersetzt.
@@ -157,7 +157,7 @@ dann Phase 3 + 4 (Rechtssicherheit und CSP vor der ersten Verlinkung an Freunde)
 ## Offene Punkte aus der Umsetzung
 
 - Der Löser (`solver.ts`) dient nur der Schwierigkeitsschätzung; in der App gibt es keine Karten, gespielt wird mit echten.
-- Kontaktadresse ist derzeit `info@9xb.de` (wie pdfshuffle); one-clue nutzt eine eigene Adresse (`1clue@9xb.de`). Bei Bedarf auf `lvl100@9xb.de` umstellen (Impressum, SECURITY.md, Test).
+- Kontaktadresse ist derzeit `lvl100@9xb.de` (wie pdfshuffle); one-clue nutzt eine eigene Adresse (`1clue@9xb.de`). Bei Bedarf auf `lvl100@9xb.de` umstellen (Impressum, SECURITY.md, Test).
 - `structuredClone` verträgt keine Svelte-`$state`-Proxies: an der Grenze UI → Modell immer `$state.snapshot()` verwenden (siehe play/prepare).
 
 ## Definition of Done für „veröffentlicht“

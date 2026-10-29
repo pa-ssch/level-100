@@ -9,6 +9,7 @@
 	import { isLanguage, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
 	import ShareDialog from '$lib/components/ShareDialog.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 	import GameRulesetTile from './GameRulesetTile.svelte';
 
 	let language = $derived(page.params.language);
@@ -58,10 +59,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Level 100</title>
-	<meta name="description" content="Level 100 – create, share and play your own card game rulesets. Runs entirely in your browser." />
-</svelte:head>
+<Seo title="Level 100" description={t(language, 'metaStart')} />
 
 <p class="description">{t(language, 'startIntro')}</p>
 {#if showExamplesHint}

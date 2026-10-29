@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import Seo from '$lib/components/Seo.svelte';
 </script>
 
-<svelte:head>
-	<title>About – Level 100</title>
-	<meta
-		name="description"
-		content="Level 100 lets you create your own rulesets for level-based card games, share them as a link or QR code and track scores. Runs entirely in your browser."
-	/>
-</svelte:head>
+<Seo
+	title="About"
+	description="Level 100 lets you create your own rulesets for level-based card games, share them as a link or QR code and track scores. Runs entirely in your browser."
+/>
 
 <article class="legal">
 	<section lang="en">

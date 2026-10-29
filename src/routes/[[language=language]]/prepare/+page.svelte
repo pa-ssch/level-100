@@ -12,6 +12,7 @@
 	import Icon from '$lib/Icon.svelte';
 	import LevelEditor from '$lib/components/LevelEditor.svelte';
 	import ShareDialog from '$lib/components/ShareDialog.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -108,10 +109,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{t(language, 'prepareTitle')} – Level 100</title>
-	<meta name="description" content="Create your own ruleset: deck, hand size and the levels to complete. Share it as a link or QR code." />
-</svelte:head>
+<Seo title={t(language, 'prepareTitle')} description={t(language, 'metaPrepare')} />
 
 <h1>{t(language, 'prepareTitle')}</h1>
 

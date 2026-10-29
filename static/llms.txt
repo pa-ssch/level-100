@@ -1,0 +1,35 @@
+# Level 100
+
+> Level 100 (lvl100.de) is a free, open-source companion web app for level-based rummy-style card games. You build your own ruleset (deck, hand size, the levels that must be completed), share it as a link or QR code, and track every player's level and score while playing with a real deck of cards. Everything runs in the browser: no server, no account, no cookies, no tracking.
+
+Level 100 is an independent project with no affiliation to "Phase 10", "Stufe 10", Contract Rummy or their rights holders. It uses none of their trademarks, artwork or rulebooks.
+
+## What the app does
+
+- Ruleset editor: choose a deck preset (values 1–12 in four suits, two of each, 8 jokers; or a poker deck 2–Ace with 2 jokers) or define a custom deck (value range, suits, copies, jokers). Define any number of levels, each with a hand size and one or more requirements: groups of equal values (optionally a fixed value), runs (optionally in one suit), cards of one suit, all-even or all-odd cards, or free text.
+- Difficulty estimate 1–10 per level, computed by simulating random starting hands from the chosen deck and checking how often the level can be laid down immediately (jokers included).
+- Level order: "in order" (classic) or "free choice" (the player decides which open level they completed when going out).
+- Sharing: the whole ruleset is compressed and encoded into the link (`/de-DE/play?r=…` or `/en-US/play?r=…`); a QR code is generated on the device. There is no server that stores or resolves links.
+- Play: enter player names, see each player's current level, record completed levels and points per round, keep a round history and detect the winner. Game state is kept in the browser's local storage.
+- Languages: German (`/de-DE/…`) and English (`/en-US/…`).
+
+## Pages
+
+- https://lvl100.de/ – language redirect
+- https://lvl100.de/de-DE/start and https://lvl100.de/en-US/start – ruleset list (history, favorites, examples)
+- https://lvl100.de/de-DE/prepare and https://lvl100.de/en-US/prepare – ruleset editor
+- https://lvl100.de/de-DE/play and https://lvl100.de/en-US/play – play a shared ruleset
+- https://lvl100.de/about – about and disclaimer (English and German)
+- https://lvl100.de/imprint – Impressum and privacy policy (German, with English summary)
+
+## Technical facts
+
+- Static site built with SvelteKit, hosted on GitHub Pages, source code under the MIT licence: https://github.com/pa-ssch/level-100
+- Privacy: no third-party requests, no cookies, strict Content Security Policy; local storage keys `level100.rulesets`, `level100.game`, `level100.language`.
+- Contact: lvl100@9xb.de (operator: 9xb, Silas Schnurr, Bühl, Germany)
+
+# Level 100 (Deutsch)
+
+> Level 100 ist eine kostenlose, quelloffene Begleit-App für Kartenspiele mit Stufen. Du stellst deinen eigenen Regelsatz zusammen (Kartendeck, Handkarten, die zu erfüllenden Level), teilst ihn als Link oder QR-Code und behältst beim Spielen mit echten Karten Level und Punkte aller Mitspieler im Blick. Alles läuft im Browser: kein Server, kein Konto, keine Cookies, kein Tracking.
+
+Level 100 ist ein eigenständiges Projekt ohne Verbindung zu „Phase 10“, „Stufe 10“, Contract Rummy oder deren Rechteinhabern.

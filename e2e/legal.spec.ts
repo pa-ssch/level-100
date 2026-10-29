@@ -27,7 +27,7 @@ test('Impressum ist aus dem Footer erreichbar und enthält die Pflichtangaben', 
 		expect(text, s).toContain(s);
 	}
 	expect(text).not.toMatch(/TMG|\[Kontakt|TODO|Platzhalter/);
-	await expect(page.locator('a[href="mailto:info@9xb.de"]').first()).toBeVisible();
+	await expect(page.locator('a[href="mailto:lvl100@9xb.de"]').first()).toBeVisible();
 	await page.getByRole('link', { name: 'Zurück zum Spiel' }).click();
 	// „/“ leitet nach Browsersprache weiter
 	await expect(page).toHaveURL(/\/(de-DE|en-US)\/start$/);

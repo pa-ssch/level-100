@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import Seo from '$lib/components/Seo.svelte';
 </script>
 
+<Seo
+	title="Impressum & Datenschutz"
+	description="Impressum, Datenschutzerklärung und Haftungsausschluss für Level 100: Betreiber, Kontakt, Hosting auf GitHub Pages, lokale Speicherung im Browser."
+/>
 <svelte:head>
-	<title>Impressum & Datenschutz – Level 100</title>
-	<meta name="description" content="Impressum, Datenschutzerklärung und Haftungsausschluss für Level 100." />
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -29,7 +32,7 @@
 	</address>
 
 	<h3>Kontakt</h3>
-	<p>E-Mail: <a href="mailto:info@9xb.de">info@9xb.de</a></p>
+	<p>E-Mail: <a href="mailto:lvl100@9xb.de">lvl100@9xb.de</a></p>
 
 	<h3>Art des Angebots</h3>
 	<p>
@@ -48,7 +51,7 @@
 		Regelsätze werden von den Nutzern selbst zusammengestellt und als Link oder QR-Code weitergegeben. Die Inhalte eines geteilten Links,
 		zum Beispiel der Name eines Regelsatzes, stammen vom jeweiligen Absender. Sie werden weder auf einem Server gespeichert noch von uns
 		geprüft. Erscheint dir ein geteilter Inhalt unangemessen, öffne den Link nicht und schreib an
-		<a href="mailto:info@9xb.de">info@9xb.de</a>.
+		<a href="mailto:lvl100@9xb.de">lvl100@9xb.de</a>.
 	</p>
 
 	<h3>Abgrenzung zu anderen Spielen</h3>
@@ -57,7 +60,7 @@
 		Spielen und deren Rechteinhabern. Level 100 verwendet keine geschützten Marken, Grafiken, Texte oder Regelwerke bestehender Spiele;
 		Design, Mechanik und Oberfläche wurden unabhängig entwickelt. Genannte Spielenamen sind Marken der jeweiligen Inhaber und dienen
 		ausschließlich der Abgrenzung. Bei Fragen oder Hinweisen zu möglichen Verwechslungen schreib an
-		<a href="mailto:info@9xb.de">info@9xb.de</a>.
+		<a href="mailto:lvl100@9xb.de">lvl100@9xb.de</a>.
 	</p>
 
 	<h3>Haftung für Links</h3>

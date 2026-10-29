@@ -1,2 +1,6 @@
+# Level 100 – https://lvl100.de
+# Alle Crawler willkommen, auch KI-Crawler. Eine maschinenlesbare Beschreibung liegt unter /llms.txt.
 User-agent: *
 Allow: /
+
+Sitemap: https://lvl100.de/sitemap.xml

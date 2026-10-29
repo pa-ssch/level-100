@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#141414"/>
+  <rect x="80" y="135" width="240" height="320" rx="24" fill="#ffffff" transform="rotate(-12 200 295)"/>
+  <rect x="240" y="135" width="240" height="320" rx="24" fill="#f4f4f4" stroke="#2e7d32" stroke-width="10" transform="rotate(12 360 295)"/>
+  <text x="300" y="350" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-weight="800" font-size="150" fill="#2e7d32">100</text>
+  <text x="580" y="270" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-weight="800" font-size="96" fill="#ffffff">Level 100</text>
+  <text x="580" y="345" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" fill="#dddddd">Regelsätze für Stufen-Kartenspiele</text>
+  <text x="580" y="400" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" fill="#dddddd">erstellen, teilen, spielen · lvl100.de</text>
+</svg>

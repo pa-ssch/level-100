@@ -6,7 +6,7 @@ Rulesets are shared by encoding them into the URL.
 If you discover a vulnerability (for example in how shared links are parsed, the
 Content Security Policy, or the build/deploy pipeline), please report it privately.
 
-- Email: info@9xb.de
+- Email: lvl100@9xb.de
 - Please include steps to reproduce and, if possible, an example link.
 
 You will receive a response within 7 days. Please do not open a public issue

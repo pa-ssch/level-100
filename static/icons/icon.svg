@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#2e7d32"/>
+  <rect x="96" y="128" width="192" height="256" rx="20" fill="#ffffff" transform="rotate(-12 192 256)"/>
+  <rect x="224" y="128" width="192" height="256" rx="20" fill="#f4f4f4" stroke="#2e7d32" stroke-width="8" transform="rotate(12 320 256)"/>
+  <text x="256" y="300" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-weight="800" font-size="150" fill="#2e7d32">100</text>
+</svg>

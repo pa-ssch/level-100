@@ -9,6 +9,7 @@
 	import { describeLevel, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
 	import ShareDialog from '$lib/components/ShareDialog.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -80,10 +81,7 @@
 	let shareUrl = $derived(browser ? page.url.toString() : '');
 </script>
 
-<svelte:head>
-	<title>{t(language, 'playTitle')} – Level 100</title>
-	<meta name="description" content="Track levels and scores for everyone at the table. Open a shared ruleset link to play along." />
-</svelte:head>
+<Seo title={t(language, 'playTitle')} description={t(language, 'metaPlay')} />
 
 {#if view.status === 'none'}
 	<h1>{t(language, 'playTitle')}</h1>

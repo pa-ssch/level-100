@@ -1,0 +1,16 @@
+{
+	"name": "Level 100",
+	"short_name": "Level 100",
+	"description": "Create, share and play your own rulesets for level-based card games. Runs entirely in your browser.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#141414",
+	"theme_color": "#2e7d32",
+	"lang": "en",
+	"icons": [
+		{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+		{ "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+		{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+	]
+}

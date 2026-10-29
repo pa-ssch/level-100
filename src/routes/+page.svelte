@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { detectLanguage } from '$lib/i18n';
 	import { loadLanguage } from '$lib/game/storage';
+	import Seo from '$lib/components/Seo.svelte';
 
 	// Die Sprachweiche muss im Browser laufen: beim statischen Build gibt es keinen Server, der Accept-Language auswerten könnte.
 	onMount(() => {
@@ -12,10 +13,10 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Level 100</title>
-	<meta name="description" content="Level 100 – create, share and play your own card game rulesets. Runs entirely in your browser." />
-</svelte:head>
+<Seo
+	title="Level 100"
+	description="Create your own rulesets for level-based card games, share them as a link or QR code and track levels and scores while playing with real cards. Runs entirely in your browser."
+/>
 
 <p class="choose">
 	<a href={resolve('/[[language=language]]/start', { language: 'de-DE' })}>Deutsch</a>

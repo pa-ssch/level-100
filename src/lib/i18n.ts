@@ -132,6 +132,12 @@ const strings = {
 		hideLevels: 'Level ausblenden',
 		invite: 'Mitspieler einladen',
 		rounds: 'Runden',
+		// Meta
+		metaStart:
+			'Eigene Regelsätze für Kartenspiele mit Stufen erstellen, als Link oder QR-Code teilen und beim Spielen mit echten Karten Level und Punkte verfolgen. Läuft komplett im Browser, ohne Konto.',
+		metaPrepare:
+			'Regelsatz zusammenstellen: Kartendeck, Handkarten und die Level mit ihren Anforderungen, inklusive Schwierigkeitsschätzung. Als Link oder QR-Code teilen.',
+		metaPlay: 'Level und Punkte aller Mitspieler am Tisch verfolgen. Geteilten Regelsatz-Link öffnen und sofort mitspielen.',
 		// Share
 		shareTitle: 'Regelsatz teilen',
 		shareHint: 'Der Link enthält den kompletten Regelsatz. Wer ihn öffnet, kann sofort mitspielen.',
@@ -241,6 +247,11 @@ const strings = {
 		hideLevels: 'Hide levels',
 		invite: 'Invite players',
 		rounds: 'Rounds',
+		metaStart:
+			'Create your own rulesets for level-based card games, share them as a link or QR code and track levels and scores while playing with real cards. Runs entirely in your browser, no account needed.',
+		metaPrepare:
+			'Build a ruleset: card deck, hand size and the levels with their requirements, including a difficulty estimate. Share it as a link or QR code.',
+		metaPlay: 'Track levels and scores for everyone at the table. Open a shared ruleset link and play along right away.',
 		shareTitle: 'Share ruleset',
 		shareHint: 'The link contains the whole ruleset. Anyone who opens it can play right away.',
 		copyLink: 'Copy link',
