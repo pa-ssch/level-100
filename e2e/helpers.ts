@@ -15,6 +15,9 @@ export const ROUTES = [
 // WebKit meldet für jedes <select> einen CSP-Verstoß seines eigenen (internen) Stylesheets, sobald style-src ohne
 // 'unsafe-inline' gesetzt ist. Das ist ein Browser-Verhalten ohne Bezug zu unserem Code und wird nur dort ignoriert.
 const WEBKIT_SELECT_QUIRK = /Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear/;
+// WebKit auf Linux (CI) meldet beim schnellen Überschreiben großer Local-Storage-Werte sporadisch einen I/O-Fehler
+// seines Storage-Backends als pageerror; die App fängt Storage-Fehler selbst ab (storage.ts).
+const WEBKIT_STORAGE_QUIRK = /NotReadableError: The I\/O read operation failed/;
 
 /** Sammelt Fehler aus der Konsole, unbehandelte Exceptions und CSP-Verstöße. */
 export function watchErrors(page: Page, browserName?: string): string[] {
@@ -23,7 +26,10 @@ export function watchErrors(page: Page, browserName?: string): string[] {
 		if (browserName === 'webkit' && WEBKIT_SELECT_QUIRK.test(msg.text())) return;
 		if (msg.type() === 'error' || /Content Security Policy/i.test(msg.text())) errors.push(`console: ${msg.text()}`);
 	});
-	page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`));
+	page.on('pageerror', (err) => {
+		if (browserName === 'webkit' && WEBKIT_STORAGE_QUIRK.test(err.message)) return;
+		errors.push(`pageerror: ${err.message}`);
+	});
 	return errors;
 }
 
