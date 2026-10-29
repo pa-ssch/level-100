@@ -24,6 +24,7 @@
 	let playerNames = $state<string[]>(['', '']);
 	let showAllLevels = $state(false);
 	let shareOpen = $state(false);
+	let error = $state<string | null>(null);
 
 	// Rundeneingabe: je Spieler das erfüllte Level (oder -1) und die Punkte
 	let entry = $state<{ completed: number; points: number }[]>([]);
@@ -50,11 +51,15 @@
 	});
 
 	function startGame(ruleset: Ruleset) {
-		const names = playerNames.map((n, i) => n.trim().slice(0, GAME_LIMITS.playerName) || t(language, 'player', { n: i + 1 }));
-		// Der Regelsatz liegt in einem $state-Proxy; structuredClone im Modell braucht ein normales Objekt.
-		const game = createGame($state.snapshot(ruleset) as Ruleset, names);
-		saveGame(game);
-		setPlaying(game);
+		try {
+			const names = playerNames.map((n, i) => n.trim().slice(0, GAME_LIMITS.playerName) || t(language, 'player', { n: i + 1 }));
+			// Der Regelsatz liegt in einem $state-Proxy; structuredClone im Modell braucht ein normales Objekt.
+			const game = createGame($state.snapshot(ruleset) as Ruleset, names);
+			saveGame(game);
+			setPlaying(game);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		}
 	}
 
 	function setPlaying(game: Game) {
@@ -63,6 +68,14 @@
 	}
 
 	function submitRound(game: Game) {
+		try {
+			submitRoundUnsafe(game);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		}
+	}
+
+	function submitRoundUnsafe(game: Game) {
 		const round = {
 			results: entry.map((e) => ({ completed: e.completed >= 0 ? e.completed : null, points: Number.isFinite(e.points) ? e.points : 0 }))
 		};
@@ -275,6 +288,10 @@
 			</table>
 		</details>
 	{/if}
+{/if}
+
+{#if error}
+	<p class="warn-text" role="alert">{t(language, 'unexpectedError')}: {error}</p>
 {/if}
 
 {#if shareOpen && shareUrl}

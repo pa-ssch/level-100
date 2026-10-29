@@ -101,3 +101,17 @@ test('freier Modus: Level in beliebiger Reihenfolge', async ({ page }) => {
 	await expect(row).toContainText('Level 5');
 	await expect(row).not.toContainText('Level 4');
 });
+
+test('funktioniert auch ohne crypto.randomUUID (unsicherer Kontext, z. B. LAN-Adresse)', async ({ page, browserName }) => {
+	const errors = watchErrors(page, browserName);
+	await page.addInitScript(() => {
+		delete (Crypto.prototype as { randomUUID?: unknown }).randomUUID;
+	});
+	await page.goto('/de-DE/start');
+	await page.getByRole('link', { name: 'Neuer Regelsatz' }).click();
+	await page.getByLabel('Name').fill('LAN-Test');
+	await page.getByRole('button', { name: 'Speichern und spielen' }).click();
+	await page.getByRole('button', { name: 'Spiel starten' }).click();
+	await expect(page.getByRole('heading', { name: 'Runde 1' })).toBeVisible();
+	expect(errors).toEqual([]);
+});

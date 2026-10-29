@@ -1,3 +1,4 @@
+import { newId } from './id';
 import type { Ruleset } from './ruleset';
 
 export interface Player {
@@ -30,7 +31,7 @@ export const GAME_LIMITS = { players: { min: 1, max: 12 }, playerName: 30, point
 export function createGame(ruleset: Ruleset, playerNames: string[]): Game {
 	return {
 		v: 1,
-		id: crypto.randomUUID(),
+		id: newId(),
 		ruleset: structuredClone(ruleset),
 		players: playerNames.map((name) => ({ name, level: 0, points: 0, done: ruleset.levels.map(() => false) })),
 		rounds: [],

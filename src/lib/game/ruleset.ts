@@ -1,4 +1,5 @@
 import { DECK_LIMITS, DECK_PRESETS, deckSize, type CardDeck } from './deck';
+import { newId } from './id';
 import { REQUIREMENT_LIMITS, requirementKinds, type Requirement } from './requirements';
 
 export interface Level {
@@ -27,9 +28,7 @@ export const RULESET_LIMITS = {
 	handSize: { min: 3, max: 20 }
 } as const;
 
-export function newId(): string {
-	return crypto.randomUUID();
-}
+export { newId };
 
 export function createRuleset(partial: Partial<Omit<Ruleset, 'v'>> = {}): Ruleset {
 	return {

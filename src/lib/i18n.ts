@@ -132,6 +132,7 @@ const strings = {
 		hideLevels: 'Level ausblenden',
 		invite: 'Mitspieler einladen',
 		rounds: 'Runden',
+		unexpectedError: 'Unerwarteter Fehler',
 		// Meta
 		metaStart:
 			'Eigene Regelsätze für Kartenspiele mit Stufen erstellen, als Link oder QR-Code teilen und beim Spielen mit echten Karten Level und Punkte verfolgen. Läuft komplett im Browser, ohne Konto.',
@@ -247,6 +248,7 @@ const strings = {
 		hideLevels: 'Hide levels',
 		invite: 'Invite players',
 		rounds: 'Rounds',
+		unexpectedError: 'Unexpected error',
 		metaStart:
 			'Create your own rulesets for level-based card games, share them as a link or QR code and track levels and scores while playing with real cards. Runs entirely in your browser, no account needed.',
 		metaPrepare:
