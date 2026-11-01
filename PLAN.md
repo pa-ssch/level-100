@@ -1,6 +1,6 @@
 # Level 100 – Plan: Ziele und Todos bis zur Veröffentlichung
 
-Stand: 29.10.2026 (Phase 0 bis 7 umgesetzt und deployt; DNS für lvl100.de offen; Restpunkte siehe unerledigte Kästchen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
+Stand: 30.10.2026 (Phase 0 bis 7 umgesetzt, live unter https://lvl100.de; Restpunkte siehe unerledigte Kästchen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
 [pa-ssch/one-clue](https://github.com/pa-ssch/one-clue) und [pa-ssch/pdfshuffle](https://github.com/pa-ssch/pdfshuffle).
 
 ## Ziel
@@ -73,7 +73,7 @@ mit Tests und automatischem Deploy. Qualitätsmaßstab: der Stand von one-clue /
 - [x] `@sveltejs/adapter-static` statt adapter-auto; `export const prerender = true` im Root-Layout; ggf. `trailingSlash: 'always'` (GitHub Pages liefert `/pfad/index.html`).
 - [x] Root-Redirect (`/` → Sprache) clientseitig in `+page.svelte` mit `onMount`, nicht im `load`. Alternativ `/` als Startseite mit Sprachwahl.
 - [x] `static/CNAME` mit `lvl100.de`; `static/robots.txt`; `.nojekyll` in `static/` (Adapter erzeugt es nicht).
-- [ ] DNS beim Registrar (netcup): A-Records `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` und AAAA `2606:50c0:8000::153` bis `::8003::153` für `lvl100.de`, `www` als CNAME auf `pa-ssch.github.io`. Stand 28.10.2026 zeigt `lvl100.de` noch auf den netcup-Domainpark (46.38.243.234). Danach in den Repo-Settings „Enforce HTTPS“ aktivieren.
+- [x] DNS steht (30.10.2026): A-Records auf GitHub Pages, `www` als CNAME, Let's-Encrypt-Zertifikat, http/www/github.io leiten auf `https://lvl100.de` um. Hinweis: GitHub Pages sendet für Custom Domains keinen HSTS-Header; die Umleitung http → https greift trotzdem.
 - [ ] `phase100.de` → 301 auf `lvl100.de` beim Registrar.
 - [x] Repo auf GitHub öffentlich; Pages per Workflow aktiviert, `pa-ssch.github.io/level-100` leitet auf `lvl100.de` um.
 
@@ -86,7 +86,7 @@ Vorlage: `.github/workflows/ci.yml` aus pdfshuffle (Lint → Typecheck → Unit 
 - [x] Playwright e2e gegen `build/` in der CI (Chromium + WebKit), Playwright-Report als Artifact bei Fehler.
 - [x] `.github/dependabot.yml` für npm und github-actions (wöchentlich, gruppiert).
 - [ ] Branch-Protection auf `main`: CI muss grün sein.
-- [ ] Optional (wie one-clue `live-check.yml`): nächtlicher Live-Check der veröffentlichten Seite (HTTPS, Zertifikat, Seite lädt fehlerfrei). Erst sinnvoll, wenn DNS steht.
+- [x] `live-check.yml`: dieselbe Playwright-Suite gegen `https://lvl100.de` (`yarn test:live`, `playwright.live.config.ts`), nach jedem Deploy, nächtlich und per Knopfdruck.
 
 ### Phase 3 – Rechtliches (½ Tag)
 
@@ -148,8 +148,8 @@ Aus ToDo.txt und Kommentaren im Code:
 - [x] `prefers-reduced-motion` respektieren.
 - [x] Meta je Sprache über `Seo.svelte`: Title, Description, canonical, hreflang (de/en/x-default), Open Graph + Twitter Card mit `og-image.png`, `sitemap.xml` (prerendered Endpoint mit hreflang), `robots.txt` mit Sitemap.
 - [x] **LLM-Optimierung**: `llms.txt` (englisch + deutsch, Funktionsumfang, Seiten, technische Fakten, Kontakt), JSON-LD `WebApplication` per Hook in jeder Seite (+ `AboutPage`/`WebPage` auf about/imprint), robots.txt erlaubt alle Crawler ausdrücklich, semantische Landmarks (nav/main/footer).
-- [ ] Nach DNS: Seite in Google Search Console und Bing Webmaster Tools anmelden, Sitemap einreichen; OG-Vorschau mit einem Link-Debugger prüfen.
-- [ ] Lighthouse ≥ 90 in allen Kategorien als Abnahmekriterium (nach DNS gegen die Live-Seite laufen lassen).
+- [ ] Google Search Console und Bing Webmaster Tools anmelden, `https://lvl100.de/sitemap.xml` einreichen; OG-Vorschau mit einem Link-Debugger prüfen (Meta-Tags sind live korrekt).
+- [x] Lighthouse (mobil, 30.10.2026): Start und Editor je 100/100/100/100; Impressum SEO 66 nur wegen des gewollten `noindex`.
 
 ## Reihenfolge-Empfehlung
 

@@ -94,3 +94,10 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # Nach dem Deploy: Ist live wirklich der neue Stand und läuft er fehlerfrei? (Details in live-check.yml)
+  live:
+    needs: deploy
+    uses: ./.github/workflows/live-check.yml
+    with:
+      wait-seconds: '120' # GitHub Pages cached bis zu 10 Minuten; meist reicht deutlich weniger
