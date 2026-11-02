@@ -1,6 +1,6 @@
 # Level 100 – Plan: Ziele und Todos bis zur Veröffentlichung
 
-Stand: 30.10.2026 (Phase 0 bis 7 umgesetzt, live unter https://lvl100.de; Restpunkte siehe unerledigte Kästchen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
+Stand: 2.11.2026 (Phase 0 bis 7 umgesetzt, live unter https://lvl100.de; neuer Userflow nach abgenommenem Konzept umgesetzt; Restpunkte siehe unerledigte Kästchen). Erstellt aus einer Analyse des Repos, der ToDo.txt und der Referenz-Repos
 [pa-ssch/one-clue](https://github.com/pa-ssch/one-clue) und [pa-ssch/pdfshuffle](https://github.com/pa-ssch/pdfshuffle).
 
 ## Ziel
@@ -131,7 +131,7 @@ Aus ToDo.txt und Kommentaren im Code:
 - [x] **Prepare-Seite**: Name, Kartendeck (Vorlagen 1–12 / Pokerblatt oder eigenes Deck mit Wertebereich, Farben, Sätzen, Jokern), Handkarten je Level, Level-Editor mit Anforderungen (Gleiche Werte mit optional festem Wert, Folge, Farbfolge, eine Farbe, gerade/ungerade, Freitext), Modus „der Reihe nach“ vs. „frei wählbar“.
 - [ ] Eigene Sonderkarten (z. B. „Aussetzen“) als Deck-Option; derzeit nur über Freitext-Anforderung abbildbar.
 - [x] **Schwierigkeit** 1–10 je Level per Simulation (400 zufällige Starthände, Löser prüft Legbarkeit inkl. Joker), live im Editor; Handkarten je Level frei einstellbar.
-- [ ] Level nach Schwierigkeit sortieren (Button im Editor).
+- [x] Level nach Schwierigkeit sortieren (Button im Editor).
 - [x] **Teilen**: Regelsatz deflate-komprimiert und base64url in `?r=`, QR-Code lokal erzeugt (`qrcode`), Link-Kopieren; ungültige/überlange Links werden abgefangen.
 - [x] **Play-Seite**: Spieler anlegen, aktuelles Level je Spieler (bei „frei wählbar“ alle offenen), Runden mit „Level geschafft“ und Punkten, Rundenverlauf, Gewinner, Spielstand im Local Storage, Weiterspielen nach Neuladen, Einladen per QR.
 - [x] **Startseite**: „Neuer Regelsatz“, Verlauf und Favoriten aus Local Storage (beim ersten Start zwei Beispiele), Spielen/Bearbeiten/Kopieren/Teilen/Favorit/Löschen.
@@ -156,6 +156,20 @@ Aus ToDo.txt und Kommentaren im Code:
 Phase 0 → 1 → 2 zuerst (danach deployt jeder Push auf `main` automatisch, auch wenn die App noch unfertig ist),
 dann Phase 3 + 4 (Rechtssicherheit und CSP vor der ersten Verlinkung an Freunde), dann Phase 5 + 6 iterativ
 (jedes Feature mit Tests), zum Schluss Phase 7.
+
+## Neuer Userflow (Konzept vom 2.11.2026, abgenommen)
+
+Konzept: https://claude.ai/artifact/W31WQaP7wZE9YGAu4TjEer. Entscheidungen: Punkte standardmäßig an (je Runde „geschafft“ / „nicht geschafft“, dann Punkte), Stern sichtbar auf der Kachel, Vorschau im Zufallsmodus, freie Reihenfolge unter „Mehr“, Minuten je Level (5) am ersten Spieleabend nachmessen.
+
+- [x] Ein Spieler je Gerät: Spielstand `v2` (erledigte Level, eigene Punkte, Runden), ein Spiel je Regelsatz in `level100.games`.
+- [x] Start (S1/S1b): Erstbesuch mit „Neues Spiel“ und „Spiel beitreten“; sonst „Läuft gerade“ und „Favoriten und Verlauf“ mit Stern und Drei-Punkt-Menü (Bearbeiten, Teilen, Duplizieren, Löschen). Kachel antippen startet bzw. setzt fort.
+- [x] Neues Spiel (S2): Zufällig oder Selbst.
+- [x] Zufällig (S3): Deck, Dauer (4/8/12 Level), Schwierigkeit; Generator (`generator.ts`) aus Bausteinkatalog mit Schätzer, aufsteigend, ohne Dubletten; Vorschau mit Einzel-Neuwürfeln, „Anpassen“, Teilen, Spielen; Name automatisch.
+- [x] Selbst (S4): Level aus Bausteinen (`blocks.ts`, Blatt mit häufigen Bausteinen, „Mehr Bausteine“ mit festem Wert und Freitext), Level-Menü, nach Schwierigkeit sortieren, „Mehr“ für Handkarten, Reihenfolge, Punkte.
+- [x] Spielen (S5): Fortschritt, eigenes Level groß, „Level geschafft“ / „Runde vorbei, nicht geschafft“, Punkteblatt mit Schnellwerten, freier Modus mit Levelwahl, Ende mit „Nochmal spielen“, Einladen per QR.
+- [x] Beitreten (S6): Name, Level-Vorschau, „Mitspielen“ in einem Tap; `?go=1` aus dem eigenen Verlauf überspringt die Ansicht.
+- [ ] Minuten je Level nachmessen und `MINUTES_PER_LEVEL` anpassen.
+- [ ] Auf echten Geräten prüfen (Blatt-Dialoge, Menü, Tastatur beim Punkteblatt).
 
 ## Offene Punkte aus der Umsetzung
 

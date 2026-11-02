@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { isLanguage, type Language } from '$lib/i18n';
-import { GAME_LIMITS, type Game } from './game';
+import type { Game } from './game';
 import { validateRuleset, type Ruleset } from './ruleset';
 
 /**
@@ -9,9 +9,11 @@ import { validateRuleset, type Ruleset } from './ruleset';
  */
 export const STORAGE_KEYS = {
 	rulesets: 'level100.rulesets',
-	game: 'level100.game',
+	games: 'level100.games',
 	language: 'level100.language'
 } as const;
+
+const MAX_STORED_GAMES = 50;
 
 const MAX_STORED_RULESETS = 50;
 
@@ -39,6 +41,8 @@ export interface StoredRuleset {
 	favorite: boolean;
 	/** ISO-Zeitpunkt der letzten Nutzung, für die Sortierung. */
 	usedAt: string;
+	/** Wie oft ein Spiel damit gestartet wurde. */
+	plays: number;
 }
 
 function validateStored(input: unknown): StoredRuleset | null {
@@ -47,7 +51,8 @@ function validateStored(input: unknown): StoredRuleset | null {
 	const ruleset = validateRuleset(s.ruleset);
 	if (ruleset === null) return null;
 	const usedAt = typeof s.usedAt === 'string' && !Number.isNaN(Date.parse(s.usedAt)) ? s.usedAt : new Date(0).toISOString();
-	return { ruleset, favorite: s.favorite === true, usedAt };
+	const plays = Number.isInteger(s.plays) && (s.plays as number) >= 0 ? (s.plays as number) : 0;
+	return { ruleset, favorite: s.favorite === true, usedAt, plays };
 }
 
 export function loadRulesets(): StoredRuleset[] {
@@ -70,10 +75,15 @@ function sortRulesets(list: StoredRuleset[]): StoredRuleset[] {
 }
 
 /** Legt einen Regelsatz ab oder aktualisiert ihn und setzt den Nutzungszeitpunkt. */
-export function saveRuleset(ruleset: Ruleset, favorite?: boolean): StoredRuleset[] {
+export function saveRuleset(ruleset: Ruleset, options: { favorite?: boolean; played?: boolean } = {}): StoredRuleset[] {
 	const list = loadRulesets();
 	const existing = list.find((s) => s.ruleset.id === ruleset.id);
-	const entry: StoredRuleset = { ruleset, favorite: favorite ?? existing?.favorite ?? false, usedAt: new Date().toISOString() };
+	const entry: StoredRuleset = {
+		ruleset,
+		favorite: options.favorite ?? existing?.favorite ?? false,
+		usedAt: new Date().toISOString(),
+		plays: (existing?.plays ?? 0) + (options.played ? 1 : 0)
+	};
 	const next = sortRulesets([entry, ...list.filter((s) => s.ruleset.id !== ruleset.id)]).slice(0, MAX_STORED_RULESETS);
 	write(STORAGE_KEYS.rulesets, next);
 	return next;
@@ -82,6 +92,7 @@ export function saveRuleset(ruleset: Ruleset, favorite?: boolean): StoredRuleset
 export function removeRuleset(id: string): StoredRuleset[] {
 	const next = loadRulesets().filter((s) => s.ruleset.id !== id);
 	write(STORAGE_KEYS.rulesets, next);
+	removeGame(id);
 	return next;
 }
 
@@ -94,48 +105,55 @@ export function toggleFavorite(id: string): StoredRuleset[] {
 function validateGame(input: unknown): Game | null {
 	if (typeof input !== 'object' || input === null) return null;
 	const g = input as Record<string, unknown>;
-	if (g.v !== 1 || typeof g.id !== 'string' || !/^[A-Za-z0-9-]{1,64}$/.test(g.id)) return null;
+	if (g.v !== 2 || typeof g.id !== 'string' || !/^[A-Za-z0-9-]{1,64}$/.test(g.id)) return null;
 	const ruleset = validateRuleset(g.ruleset);
-	if (ruleset === null || !Array.isArray(g.players) || !Array.isArray(g.rounds)) return null;
-	if (g.players.length < GAME_LIMITS.players.min || g.players.length > GAME_LIMITS.players.max) return null;
-	const levelCount = ruleset.levels.length;
-	const players: Game['players'] = [];
-	for (const p of g.players) {
-		if (typeof p !== 'object' || p === null) return null;
-		const pl = p as Record<string, unknown>;
-		if (typeof pl.name !== 'string' || pl.name.length > GAME_LIMITS.playerName) return null;
-		if (!Number.isInteger(pl.level) || (pl.level as number) < 0 || (pl.level as number) > levelCount) return null;
-		if (typeof pl.points !== 'number' || !Number.isFinite(pl.points)) return null;
-		if (!Array.isArray(pl.done) || pl.done.length !== levelCount || !pl.done.every((d) => typeof d === 'boolean')) return null;
-		players.push({ name: pl.name, level: pl.level as number, points: pl.points, done: pl.done as boolean[] });
-	}
+	if (ruleset === null || !Array.isArray(g.done) || !Array.isArray(g.rounds)) return null;
+	if (g.done.length !== ruleset.levels.length || !g.done.every((d) => typeof d === 'boolean')) return null;
+	if (typeof g.points !== 'number' || !Number.isFinite(g.points)) return null;
 	const rounds: Game['rounds'] = [];
 	for (const r of g.rounds) {
-		if (typeof r !== 'object' || r === null || !Array.isArray((r as Record<string, unknown>).results)) return null;
-		const results = (r as { results: unknown[] }).results;
-		if (results.length !== players.length) return null;
-		const parsed: Game['rounds'][number]['results'] = [];
-		for (const x of results) {
-			if (typeof x !== 'object' || x === null) return null;
-			const res = x as Record<string, unknown>;
-			const completed = res.completed === null ? null : Number.isInteger(res.completed) ? (res.completed as number) : undefined;
-			if (completed === undefined || typeof res.points !== 'number' || !Number.isFinite(res.points)) return null;
-			parsed.push({ completed, points: res.points });
-		}
-		rounds.push({ results: parsed });
+		if (typeof r !== 'object' || r === null) return null;
+		const res = r as Record<string, unknown>;
+		const completed = res.completed === null ? null : Number.isInteger(res.completed) ? (res.completed as number) : undefined;
+		if (completed === undefined || typeof res.points !== 'number' || !Number.isFinite(res.points)) return null;
+		rounds.push({ completed, points: res.points });
 	}
 	const startedAt = typeof g.startedAt === 'string' ? g.startedAt : new Date(0).toISOString();
-	return { v: 1, id: g.id, ruleset, players, rounds, startedAt };
+	const finishedAt = typeof g.finishedAt === 'string' ? g.finishedAt : null;
+	return { v: 2, id: g.id, ruleset, done: g.done as boolean[], points: g.points, rounds, startedAt, finishedAt };
 }
 
-export function loadGame(): Game | null {
-	return validateGame(read(STORAGE_KEYS.game));
+/** Alle gespeicherten Spiele (höchstens eines je Regelsatz), neueste zuerst. */
+export function loadGames(): Game[] {
+	const raw = read(STORAGE_KEYS.games);
+	if (!Array.isArray(raw)) return [];
+	const seen = new Set<string>();
+	const out: Game[] = [];
+	for (const item of raw) {
+		const game = validateGame(item);
+		if (game && !seen.has(game.ruleset.id)) {
+			seen.add(game.ruleset.id);
+			out.push(game);
+		}
+	}
+	return out;
 }
 
-export function saveGame(game: Game | null): void {
-	if (!browser) return;
-	if (game === null) localStorage.removeItem(STORAGE_KEYS.game);
-	else write(STORAGE_KEYS.game, game);
+/** Das Spiel zu einem Regelsatz, falls vorhanden. */
+export function loadGame(rulesetId: string): Game | null {
+	return loadGames().find((g) => g.ruleset.id === rulesetId) ?? null;
+}
+
+export function saveGame(game: Game): void {
+	const next = [game, ...loadGames().filter((g) => g.ruleset.id !== game.ruleset.id)].slice(0, MAX_STORED_GAMES);
+	write(STORAGE_KEYS.games, next);
+}
+
+export function removeGame(rulesetId: string): void {
+	write(
+		STORAGE_KEYS.games,
+		loadGames().filter((g) => g.ruleset.id !== rulesetId)
+	);
 }
 
 export function loadLanguage(): Language | null {

@@ -1,7 +1,7 @@
 # Level 100
 
-Regelsätze für Kartenspiele der „Stufen“-Art selbst zusammenstellen, per Link oder QR-Code mit Freunden teilen und
-gemeinsam spielen. Level 100 ist eine rein clientseitige Web-App: kein Backend, keine Konten, keine Cookies, kein Tracking.
+Spiele für Kartenspiele der „Stufen“-Art zusammenstellen (zufällig nach Dauer und Schwierigkeit oder selbst aus Bausteinen),
+per Link oder QR-Code mit Freunden teilen und mit einem Handy je Spieler mitzählen. Level 100 ist eine rein clientseitige Web-App: kein Backend, keine Konten, keine Cookies, kein Tracking.
 
 Live: [lvl100.de](https://lvl100.de) (GitHub Pages)
 
@@ -28,14 +28,14 @@ yarn preview    # Build lokal ansehen
 - `src/lib/game/` – Domänenmodell: Deck, Level-Anforderungen, Löser (nur für die Schwierigkeitsschätzung per Simulation), Regelsatz mit
   Validierung, Share-Link-Kodierung (deflate + base64url), Spielstand, Local Storage; Tests daneben als `*.test.ts`
 - `src/lib/i18n.ts` – Übersetzungen und lesbare Level-Beschreibungen; `src/lib/components/` – Level-Editor, Teilen-Dialog (QR)
-- `src/routes/[[language=language]]/` – Seiten je Sprache (`de-DE`, `en-US`): `start`, `prepare`, `play`
+- `src/routes/[[language=language]]/` – Seiten je Sprache (`de-DE`, `en-US`): `start` (Verlauf), `new`, `random` (Zufallsspiel), `prepare` (Baustein-Editor), `play` (Spielen/Beitreten)
 - `src/routes/about|imprint|privacy` – Disclaimer, Impressum, Datenschutz
 - `e2e/` – Playwright-Tests gegen den statischen Build: Rendering, Barrierefreiheit (axe), CSP, keine fremden Requests, Impressum
 - `test/` – Tests für die Konfiguration (CSP-Hash)
 - `src/lib/site.ts`, `src/lib/seo.ts`, `src/lib/components/Seo.svelte` – Site-Konstanten, JSON-LD, Meta-Tags (canonical, hreflang, Open Graph)
 - `static/` – `CNAME`, `robots.txt`, `llms.txt`, `manifest.webmanifest`, Icons (`icons/icon.svg` ist die Quelle der PNGs)
 
-Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.game` (laufendes Spiel), `level100.language`.
+Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.games` (Spielstände, ein Spieler je Gerät), `level100.language`.
 
 Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Die Content-Security-Policy steht als Meta-Tag in jeder
 Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0). Spielzustand und geteilte Regelsätze leben

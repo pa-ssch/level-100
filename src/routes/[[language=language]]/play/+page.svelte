@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { GAME_LIMITS, applyRound, createGame, isFinished, openLevels, type Game } from '$lib/game/game';
+	import { GAME_LIMITS, applyRound, createGame, currentLevel, isFinished, openLevels, restartGame, type Game } from '$lib/game/game';
+	import { levelCards } from '$lib/game/requirements';
 	import type { Ruleset } from '$lib/game/ruleset';
 	import { decodeRuleset } from '$lib/game/share';
 	import { loadGame, saveGame, saveRuleset } from '$lib/game/storage';
+	import { href } from '$lib/links';
 	import { describeLevel, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
-	import ShareDialog from '$lib/components/ShareDialog.svelte';
 	import Seo from '$lib/components/Seo.svelte';
+	import Sheet from '$lib/components/Sheet.svelte';
+	import ShareDialog from '$lib/components/ShareDialog.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -17,25 +19,21 @@
 		| { status: 'loading' }
 		| { status: 'none' }
 		| { status: 'invalid' }
-		| { status: 'resume'; ruleset: Ruleset; game: Game }
-		| { status: 'setup'; ruleset: Ruleset }
+		| { status: 'join'; ruleset: Ruleset; again: boolean }
 		| { status: 'playing'; game: Game };
 	let view = $state<View>({ status: 'loading' });
-	let playerNames = $state<string[]>(['', '']);
-	let showAllLevels = $state(false);
-	let shareOpen = $state(false);
 	let error = $state<string | null>(null);
-
-	// Rundeneingabe: je Spieler das erfüllte Level (oder -1) und die Punkte
-	let entry = $state<{ completed: number; points: number }[]>([]);
+	let showAll = $state(false);
+	let shareOpen = $state(false);
+	/** Rundeneingabe: welches Level geschafft (null = keins) und Punkte. */
+	let entry = $state<{ completed: number | null; points: number } | null>(null);
 
 	$effect(() => {
 		if (!browser) return;
 		const payload = page.url.searchParams.get('r');
+		const go = page.url.searchParams.get('go') === '1';
 		if (payload === null) {
-			// Ohne Link: ein laufendes Spiel fortsetzen, sonst Hinweis
-			const game = loadGame();
-			view = game && !isFinished(game) ? { status: 'playing', game } : { status: 'none' };
+			view = { status: 'none' };
 			return;
 		}
 		decodeRuleset(payload).then((ruleset) => {
@@ -44,355 +42,424 @@
 				return;
 			}
 			saveRuleset(ruleset); // in den Verlauf aufnehmen
-			const game = loadGame();
-			if (game && game.ruleset.id === ruleset.id && !isFinished(game)) view = { status: 'resume', ruleset, game };
-			else view = { status: 'setup', ruleset };
+			const game = loadGame(ruleset.id);
+			if (game && !isFinished(game)) view = { status: 'playing', game };
+			else if (go) start(ruleset);
+			else view = { status: 'join', ruleset, again: game !== null };
 		});
 	});
 
-	function startGame(ruleset: Ruleset) {
+	function start(ruleset: Ruleset) {
 		try {
-			const names = playerNames.map((n, i) => n.trim().slice(0, GAME_LIMITS.playerName) || t(language, 'player', { n: i + 1 }));
-			// Der Regelsatz liegt in einem $state-Proxy; structuredClone im Modell braucht ein normales Objekt.
-			const game = createGame($state.snapshot(ruleset) as Ruleset, names);
+			// Aus der Beitreten-Ansicht kommt der Regelsatz als $state-Proxy; structuredClone braucht ein normales Objekt.
+			const plain = $state.snapshot(ruleset) as Ruleset;
+			const game = createGame(plain);
+			saveRuleset(plain, { played: true });
 			saveGame(game);
-			setPlaying(game);
+			view = { status: 'playing', game };
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 		}
 	}
 
-	function setPlaying(game: Game) {
-		entry = game.players.map(() => ({ completed: -1, points: 0 }));
-		view = { status: 'playing', game };
+	function beginRound(game: Game, completed: number | null) {
+		if (game.ruleset.mode === 'free' && completed === -1) {
+			entry = { completed: null, points: 0 }; // erst Level wählen
+			return;
+		}
+		if (!game.ruleset.points) {
+			commit(game, { completed, points: 0 });
+			return;
+		}
+		entry = { completed, points: 0 };
 	}
 
-	function submitRound(game: Game) {
+	function commit(game: Game, round: { completed: number | null; points: number }) {
 		try {
-			submitRoundUnsafe(game);
+			const next = applyRound($state.snapshot(game) as Game, round);
+			saveGame(next);
+			view = { status: 'playing', game: next };
+			entry = null;
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 		}
 	}
 
-	function submitRoundUnsafe(game: Game) {
-		const round = {
-			results: entry.map((e) => ({ completed: e.completed >= 0 ? e.completed : null, points: Number.isFinite(e.points) ? e.points : 0 }))
-		};
-		const next = applyRound(game, round);
+	function again(game: Game) {
+		const next = restartGame($state.snapshot(game) as Game);
+		saveRuleset(next.ruleset, { played: true });
 		saveGame(next);
-		setPlaying(next);
+		view = { status: 'playing', game: next };
 	}
 
-	function restart(ruleset: Ruleset, confirmFirst: boolean) {
-		if (confirmFirst && !confirm(t(language, 'newGameConfirm'))) return;
-		saveGame(null);
-		playerNames = ['', ''];
-		view = { status: 'setup', ruleset };
-	}
-
-	let shareUrl = $derived(browser ? page.url.toString() : '');
+	let shareUrl = $derived.by(() => {
+		if (!browser) return '';
+		const url = new URL(page.url);
+		url.searchParams.delete('go');
+		return url.toString();
+	});
 </script>
 
-<Seo title={t(language, 'playTitle')} description={t(language, 'metaPlay')} />
+<Seo title={t(language, 'play')} description={t(language, 'metaPlay')} />
 
 {#if view.status === 'none'}
-	<h1>{t(language, 'playTitle')}</h1>
+	<h1>{t(language, 'play')}</h1>
 	<p>{t(language, 'noGame')}</p>
-	<p><a href={resolve('/[[language=language]]/start', { language })}>{t(language, 'toStart')}</a></p>
+	<p><a href={href('/[[language=language]]/start', language)}>{t(language, 'toStart')}</a></p>
 {:else if view.status === 'invalid'}
-	<h1>{t(language, 'playTitle')}</h1>
+	<h1>{t(language, 'play')}</h1>
 	<p class="warn-text" role="alert">{t(language, 'invalidLink')}</p>
-	<p><a href={resolve('/[[language=language]]/start', { language })}>{t(language, 'toStart')}</a></p>
-{:else if view.status === 'resume'}
-	{@const { ruleset, game } = view}
-	<h1>{ruleset.name}</h1>
-	<p>{t(language, 'continueGame')}</p>
-	<div class="actions">
-		<button type="button" class="primary" onclick={() => setPlaying(game)}><Icon name="play" /> {t(language, 'continue')}</button>
-		<button type="button" onclick={() => restart(ruleset, false)}>{t(language, 'restart')}</button>
-	</div>
-{:else if view.status === 'setup'}
+	<p><a href={href('/[[language=language]]/start', language)}>{t(language, 'toStart')}</a></p>
+{:else if view.status === 'join'}
 	{@const ruleset = view.ruleset}
 	<h1>{ruleset.name}</h1>
-	<form
-		onsubmit={(e) => {
-			e.preventDefault();
-			startGame(ruleset);
-		}}
-	>
-		<h2><Icon name="users" /> {t(language, 'players')}</h2>
-		{#each playerNames as name, i (i)}
-			<div class="player-row">
-				<label>
-					<span class="visually-hidden">{t(language, 'playerName')} {i + 1}{name ? `: ${name}` : ''}</span>
-					<input
-						type="text"
-						maxlength={GAME_LIMITS.playerName}
-						placeholder={t(language, 'player', { n: i + 1 })}
-						bind:value={playerNames[i]}
-					/>
-				</label>
-				<button
-					type="button"
-					class="icon-button"
-					onclick={() => playerNames.splice(i, 1)}
-					disabled={playerNames.length <= GAME_LIMITS.players.min}
-					aria-label="{t(language, 'removePlayer')} {i + 1}"
-					title={t(language, 'removePlayer')}><Icon name="xmark" /></button
-				>
-			</div>
+	<p class="meta">
+		{t(language, 'levelCount', { n: ruleset.levels.length })} · {t(language, 'cardCount', { n: ruleset.levels[0].handSize })} · {t(
+			language,
+			'joinIntro'
+		)}
+	</p>
+	<ol class="levels">
+		{#each ruleset.levels.slice(0, 3) as level, i (i)}
+			<li>{describeLevel(language, level.requirements)}</li>
 		{/each}
-		<button type="button" class="secondary" onclick={() => playerNames.push('')} disabled={playerNames.length >= GAME_LIMITS.players.max}>
-			<Icon name="plus" />
-			{t(language, 'addPlayer')}
-		</button>
-		<div class="actions">
-			<button type="submit" class="primary"><Icon name="play" /> {t(language, 'startGame')}</button>
-			<button type="button" onclick={() => (shareOpen = true)}><Icon name="qrcode" /> {t(language, 'invite')}</button>
-		</div>
-	</form>
+	</ol>
+	{#if ruleset.levels.length > 3}
+		<p class="meta">{t(language, 'joinMore', { n: ruleset.levels.length - 3 })}</p>
+	{/if}
+	<div class="actions">
+		<button type="button" class="primary big" onclick={() => start(ruleset)}
+			><Icon name="play" /> {view.again ? t(language, 'playAgain') : t(language, 'joinPlay')}</button
+		>
+	</div>
+	<p class="meta">{t(language, 'joinSaved')}</p>
 {:else if view.status === 'playing'}
 	{@const game = view.game}
 	{@const ruleset = game.ruleset}
 	{@const finished = isFinished(game)}
-	<h1>{ruleset.name}</h1>
+	{@const current = currentLevel(game)}
+	{@const open = openLevels(game)}
+	<header class="top">
+		<h1>{ruleset.name}</h1>
+		<button
+			type="button"
+			class="icon-button"
+			onclick={() => (shareOpen = true)}
+			aria-label={t(language, 'invite')}
+			title={t(language, 'invite')}><Icon name="qrcode" /></button
+		>
+	</header>
+
+	<div
+		class="progress"
+		role="img"
+		aria-label={t(language, 'levelOf', { n: (current ?? ruleset.levels.length - 1) + 1, total: ruleset.levels.length })}
+	>
+		{#each game.done as done, i (i)}
+			<i class:done class:now={i === current}></i>
+		{/each}
+	</div>
+	<p class="meta center">
+		{#if finished}{t(language, 'finishedStatus')}{:else}{t(language, 'levelOf', {
+				n: (current ?? 0) + 1,
+				total: ruleset.levels.length
+			})}{/if}
+		{#if ruleset.points}· {t(language, 'pointsTotal', { n: game.points })}{/if}
+	</p>
 
 	{#if finished}
-		{@const winner = game.players.find((p) => p.done.every(Boolean))}
-		<p class="finished" role="status">{t(language, 'finished', { name: winner?.name ?? '' })}</p>
-	{/if}
-
-	<table class="players">
-		<thead>
-			<tr>
-				<th>{t(language, 'players')}</th>
-				<th>{t(language, 'currentLevel')}</th>
-				<th class="num">{t(language, 'points')}</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each game.players as player, i (i)}
-				{@const open = openLevels(game, player)}
-				<tr>
-					<th scope="row">{player.name}</th>
-					<td>
-						{#if open.length === 0}
-							<strong>{t(language, 'allDone')}</strong>
-						{:else if ruleset.mode === 'fixed'}
-							<strong>{t(language, 'level', { n: open[0] + 1 })}</strong>: {describeLevel(language, ruleset.levels[open[0]].requirements)}
-							<small>({t(language, 'cardCount', { n: ruleset.levels[open[0]].handSize })})</small>
-						{:else}
-							<ul class="open">
-								{#each open as index (index)}
-									<li>
-										<strong>{t(language, 'level', { n: index + 1 })}</strong>: {describeLevel(language, ruleset.levels[index].requirements)}
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</td>
-					<td class="num">{player.points}</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
-
-	{#if !finished}
-		<form
-			class="round"
-			onsubmit={(e) => {
-				e.preventDefault();
-				submitRound(game);
-			}}
-		>
-			<h2>{t(language, 'round', { n: game.rounds.length + 1 })}</h2>
-			{#each game.players as player, i (i)}
-				{@const open = openLevels(game, player)}
-				<div class="round-row">
-					<span class="name">{player.name}</span>
-					{#if ruleset.mode === 'fixed'}
-						<label class="checkbox">
-							<input
-								type="checkbox"
-								checked={entry[i]?.completed === open[0]}
-								disabled={open.length === 0}
-								onchange={(e) => (entry[i].completed = (e.target as HTMLInputElement).checked ? open[0] : -1)}
-							/>
-							{t(language, 'completed')}
-						</label>
-					{:else}
-						<label>
-							{t(language, 'completedWhich')}
-							<select
-								value={String(entry[i]?.completed ?? -1)}
-								onchange={(e) => (entry[i].completed = Number((e.target as HTMLSelectElement).value))}
-							>
-								<option value="-1">{t(language, 'none')}</option>
-								{#each open as index (index)}
-									<option value={String(index)}>{t(language, 'level', { n: index + 1 })}</option>
-								{/each}
-							</select>
-						</label>
-					{/if}
-					<label>
-						{t(language, 'roundPoints')}
-						<input type="number" min={GAME_LIMITS.points.min} max={GAME_LIMITS.points.max} step="1" bind:value={entry[i].points} />
-					</label>
-				</div>
-			{/each}
-			<div class="actions">
-				<button type="submit" class="primary">{t(language, 'submitRound')}</button>
+		<section class="hero finished" role="status">
+			<div class="lvl">🎉</div>
+			<div class="req">{t(language, 'finishedTitle')}</div>
+			<div class="hand">
+				{ruleset.points
+					? t(language, 'finishedSummary', { rounds: game.rounds.length, points: game.points })
+					: t(language, 'finishedSummaryNoPoints', { rounds: game.rounds.length })}
 			</div>
-		</form>
+		</section>
+		<div class="actions">
+			<button type="button" class="primary big" onclick={() => again(game)}><Icon name="rotate-right" /> {t(language, 'playAgain')}</button>
+			<a class="button" href={href('/[[language=language]]/start', language)}>{t(language, 'toHistory')}</a>
+		</div>
+	{:else if ruleset.mode === 'fixed' && current !== null}
+		{@const level = ruleset.levels[current]}
+		<section class="hero">
+			<div class="lvl">{t(language, 'yourLevel')}</div>
+			<div class="req">{describeLevel(language, level.requirements)}</div>
+			<div class="hand">
+				{levelCards(level.requirements) > 0
+					? t(language, 'handNeeded', { hand: level.handSize, need: levelCards(level.requirements) })
+					: t(language, 'handOnly', { hand: level.handSize })}
+			</div>
+		</section>
+		<div class="actions">
+			<button type="button" class="primary big" onclick={() => beginRound(game, current)}
+				><Icon name="check" /> {t(language, 'completed')}</button
+			>
+		</div>
+		{#if ruleset.points}
+			<div class="actions">
+				<button type="button" class="secondary wide" onclick={() => beginRound(game, null)}>{t(language, 'notCompleted')}</button>
+			</div>
+		{/if}
+		{#if current + 1 < ruleset.levels.length}
+			<p class="meta center">{t(language, 'nextLevel', { d: describeLevel(language, ruleset.levels[current + 1].requirements) })}</p>
+		{/if}
+	{:else}
+		<section class="hero">
+			<div class="lvl">{t(language, 'openLevelsTitle')}</div>
+			<ul class="open">
+				{#each open as i (i)}
+					<li><strong>{t(language, 'level', { n: i + 1 })}</strong>: {describeLevel(language, ruleset.levels[i].requirements)}</li>
+				{/each}
+			</ul>
+		</section>
+		<div class="actions">
+			<button type="button" class="primary big" onclick={() => beginRound(game, -1)}
+				><Icon name="check" /> {t(language, 'completed')}</button
+			>
+		</div>
+		{#if ruleset.points}
+			<div class="actions">
+				<button type="button" class="secondary wide" onclick={() => beginRound(game, null)}>{t(language, 'notCompleted')}</button>
+			</div>
+		{/if}
 	{/if}
 
-	<div class="actions secondary-actions">
-		<button type="button" class="secondary" onclick={() => (showAllLevels = !showAllLevels)} aria-expanded={showAllLevels}>
-			{showAllLevels ? t(language, 'hideLevels') : t(language, 'showAllLevels')}
-		</button>
-		<button type="button" class="secondary" onclick={() => (shareOpen = true)}><Icon name="qrcode" /> {t(language, 'invite')}</button>
-		<button type="button" class="secondary" onclick={() => restart(ruleset, !finished)}
-			><Icon name="plus" /> {t(language, 'newGame')}</button
+	<p class="center">
+		<button type="button" class="secondary" onclick={() => (showAll = !showAll)} aria-expanded={showAll}
+			>{showAll ? t(language, 'hideAll') : t(language, 'showAll')}</button
 		>
-	</div>
-
-	{#if showAllLevels}
-		<ol class="all-levels">
+	</p>
+	{#if showAll}
+		<ol class="levels">
 			{#each ruleset.levels as level, i (i)}
-				<li>{describeLevel(language, level.requirements)} <small>({t(language, 'cardCount', { n: level.handSize })})</small></li>
+				<li class:done={game.done[i]}>
+					{describeLevel(language, level.requirements)} <small>({t(language, 'cardCount', { n: level.handSize })})</small>
+				</li>
 			{/each}
 		</ol>
 	{/if}
 
-	{#if game.rounds.length > 0}
-		<details class="history">
-			<summary>{t(language, 'rounds')}: {game.rounds.length}</summary>
-			<table>
-				<thead>
-					<tr>
-						<th></th>
-						{#each game.players as player, i (i)}<th>{player.name}</th>{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each game.rounds as round, r (r)}
-						<tr>
-							<th scope="row">{t(language, 'round', { n: r + 1 })}</th>
-							{#each round.results as result, i (i)}
-								<td class="num">{result.points}{result.completed !== null ? ' ✓' : ''}</td>
-							{/each}
-						</tr>
+	{#if entry}
+		{@const draft = entry}
+		<Sheet
+			title={ruleset.mode === 'free' && draft.completed === null ? t(language, 'whichLevel') : t(language, 'pointsSheet')}
+			{language}
+			onclose={() => (entry = null)}
+		>
+			{#if ruleset.mode === 'free' && draft.completed === null}
+				<div class="choices">
+					{#each open as i (i)}
+						<button type="button" onclick={() => (ruleset.points ? (draft.completed = i) : commit(game, { completed: i, points: 0 }))}
+							><strong>{t(language, 'level', { n: i + 1 })}</strong> {describeLevel(language, ruleset.levels[i].requirements)}</button
+						>
 					{/each}
-				</tbody>
-			</table>
-		</details>
+				</div>
+			{:else}
+				<form
+					class="points"
+					onsubmit={(e) => {
+						e.preventDefault();
+						commit(game, { completed: draft.completed, points: draft.points });
+					}}
+				>
+					<label>
+						<span class="visually-hidden">{t(language, 'pointsSheet')}</span>
+						<input
+							type="number"
+							inputmode="numeric"
+							min={GAME_LIMITS.points.min}
+							max={GAME_LIMITS.points.max}
+							step="1"
+							bind:value={draft.points}
+						/>
+					</label>
+					<div class="quick">
+						{#each [5, 10, 15, 20, 25] as n (n)}
+							<button type="button" onclick={() => (draft.points = Math.min(GAME_LIMITS.points.max, (draft.points || 0) + n))}>+{n}</button>
+						{/each}
+						<button type="button" onclick={() => (draft.points = 0)}>0</button>
+					</div>
+					<button type="submit" class="primary big">{t(language, 'done')}</button>
+				</form>
+			{/if}
+		</Sheet>
 	{/if}
 {/if}
 
 {#if error}
 	<p class="warn-text" role="alert">{t(language, 'unexpectedError')}: {error}</p>
 {/if}
-
 {#if shareOpen && shareUrl}
 	<ShareDialog url={shareUrl} {language} onclose={() => (shareOpen = false)} />
 {/if}
 
 <style lang="scss">
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin: 16px 0;
+	h1 {
+		font-size: 1.4em;
+		margin: 12px 0;
 	}
 
-	.player-row {
+	.top {
 		display: flex;
-		gap: 8px;
 		align-items: center;
-		margin: 6px 0;
+		justify-content: space-between;
+		gap: 8px;
+	}
 
-		label {
-			flex: 1 1 auto;
-		}
+	.meta {
+		opacity: 0.75;
+		font-size: 0.9em;
+		margin: 4px 0;
+	}
 
-		input {
-			width: 100%;
-			box-sizing: border-box;
+	.center {
+		text-align: center;
+	}
+
+	.progress {
+		display: flex;
+		gap: 4px;
+		margin: 8px 0 4px;
+
+		i {
+			flex: 1;
+			height: 8px;
+			border-radius: 4px;
+			background: var(--border);
+
+			&.done {
+				background: var(--accent);
+			}
+
+			&.now {
+				background: var(--foreground);
+			}
 		}
 	}
 
-	table {
-		width: 100%;
-		border-collapse: collapse;
+	.hero {
+		border: 2px solid var(--accent);
+		border-radius: 16px;
+		padding: 20px 16px;
+		text-align: center;
+		background: var(--surface);
 		margin: 12px 0;
 
-		th,
-		td {
-			text-align: left;
-			padding: 8px 6px;
-			border-bottom: 1px solid var(--border);
-			vertical-align: top;
+		.lvl {
+			font-size: 0.8em;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			opacity: 0.7;
 		}
 
-		.num {
-			text-align: right;
-			white-space: nowrap;
+		.req {
+			font-size: 1.7em;
+			font-weight: bold;
+			line-height: 1.15;
+			margin: 8px 0;
+		}
+
+		.hand {
+			opacity: 0.75;
+			font-size: 0.9em;
+		}
+
+		&.finished {
+			border-color: var(--accent);
 		}
 	}
 
 	.open {
-		margin: 0;
+		text-align: left;
+		margin: 8px 0 0;
 		padding-left: 1.2em;
 	}
 
-	.finished {
-		font-size: 1.2em;
-		font-weight: bold;
-		color: var(--accent);
-	}
-
-	.round {
-		border: 1px solid var(--border);
-		border-radius: 10px;
-		padding: 8px 16px 4px;
-		margin: 16px 0;
-
-		h2 {
-			margin: 8px 0;
-		}
-	}
-
-	.round-row {
+	.actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 8px 16px;
-		align-items: center;
-		padding: 8px 0;
-		border-top: 1px solid var(--border);
+		gap: 8px;
+		margin: 10px 0;
 
-		.name {
-			flex: 1 1 120px;
-			font-weight: bold;
+		.big {
+			flex: 1;
+			justify-content: center;
+			padding: 18px;
+			font-size: 1.15em;
 		}
 
-		label {
-			display: flex;
-			gap: 8px;
+		.wide {
+			flex: 1;
+			justify-content: center;
+		}
+
+		.button {
+			flex: 1;
+			display: inline-flex;
+			justify-content: center;
 			align-items: center;
-			font-size: 0.9em;
-		}
-
-		input[type='number'] {
-			width: 5em;
+			border: 1px solid var(--border);
+			border-radius: 6px;
+			padding: 6px 10px;
 		}
 	}
 
-	.all-levels li {
-		margin: 4px 0;
+	.levels {
+		padding-left: 1.4em;
+
+		li {
+			margin: 4px 0;
+
+			&.done {
+				opacity: 0.5;
+				text-decoration: line-through;
+			}
+		}
 	}
 
-	.history {
-		margin: 16px 0 32px;
+	.choices {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+
+		button {
+			justify-content: flex-start;
+			gap: 8px;
+			padding: 12px;
+			text-align: left;
+		}
+	}
+
+	.points {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+
+		input {
+			width: 100%;
+			box-sizing: border-box;
+			font-size: 2em;
+			font-weight: bold;
+			text-align: center;
+		}
+
+		.quick {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 6px;
+
+			button {
+				justify-content: center;
+				padding: 12px;
+				font-weight: bold;
+			}
+		}
+
+		.big {
+			justify-content: center;
+			padding: 14px;
+		}
 	}
 </style>

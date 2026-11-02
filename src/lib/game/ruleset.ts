@@ -19,6 +19,8 @@ export interface Ruleset {
 	levels: Level[];
 	/** `fixed`: Level der Reihe nach. `free`: beim Rauskommen wird gewählt, welches Level erfüllt wurde. */
 	mode: LevelSelectionMode;
+	/** Punkte (Restkarten) nach jeder Runde erfassen. */
+	points: boolean;
 }
 
 export const RULESET_LIMITS = {
@@ -37,7 +39,8 @@ export function createRuleset(partial: Partial<Omit<Ruleset, 'v'>> = {}): Rulese
 		name: partial.name ?? '',
 		deck: partial.deck ?? { ...DECK_PRESETS.standard },
 		levels: partial.levels ?? [{ requirements: [{ kind: 'set', size: 3, count: 2 }], handSize: 10 }],
-		mode: partial.mode ?? 'fixed'
+		mode: partial.mode ?? 'fixed',
+		points: partial.points ?? true
 	};
 }
 
@@ -188,5 +191,8 @@ export function validateRuleset(input: unknown): Ruleset | null {
 		if (valid === null) return null;
 		levels.push(valid);
 	}
-	return { v: 1, id, name, deck, levels, mode: r.mode };
+	// `points` kam später dazu; ältere Links haben das Feld nicht.
+	const points = r.points === undefined ? true : r.points;
+	if (typeof points !== 'boolean') return null;
+	return { v: 1, id, name, deck, levels, mode: r.mode, points };
 }

@@ -48,8 +48,8 @@
 		die Richtigkeit, Vollständigkeit und Aktualität der Inhalte wird keine Gewähr übernommen.
 	</p>
 	<p>
-		Regelsätze werden von den Nutzern selbst zusammengestellt und als Link oder QR-Code weitergegeben. Die Inhalte eines geteilten Links,
-		zum Beispiel der Name eines Regelsatzes, stammen vom jeweiligen Absender. Sie werden weder auf einem Server gespeichert noch von uns
+		Spiele werden von den Nutzern selbst zusammengestellt und als Link oder QR-Code weitergegeben. Die Inhalte eines geteilten Links, zum
+		Beispiel der Name eines Regelsatzes, stammen vom jeweiligen Absender. Sie werden weder auf einem Server gespeichert noch von uns
 		geprüft. Erscheint dir ein geteilter Inhalt unangemessen, öffne den Link nicht und schreib an
 		<a href="mailto:lvl100@9xb.de">lvl100@9xb.de</a>.
 	</p>
@@ -87,8 +87,8 @@
 	<h2>Was diese Seite tut und was nicht</h2>
 	<p>
 		Level 100 ist eine reine Browser-Anwendung. Es gibt keinen Anwendungsserver, keine Anmeldung, keine Benutzerkonten, keine Cookies, keine
-		Analyse- oder Werbedienste und keine Einbindung externer Dienste (auch keine externen Schriftarten oder Skripte). Regelsätze,
-		Spielstände und Punkte verlassen dein Gerät nur dann, wenn du selbst einen Link oder QR-Code weitergibst.
+		Analyse- oder Werbedienste und keine Einbindung externer Dienste (auch keine externen Schriftarten oder Skripte). Spiele, Spielstände
+		und Punkte verlassen dein Gerät nur dann, wenn du selbst einen Link oder QR-Code weitergibst.
 	</p>
 
 	<h2>Hosting</h2>
@@ -107,10 +107,10 @@
 
 	<h2>Lokale Speicherung im Browser</h2>
 	<p>
-		Die Seite speichert im <b>Local Storage</b> deines Browsers ausschließlich, was für das Spiel gebraucht wird: die Regelsätze, die du angelegt
-		oder geöffnet hast (Verlauf und Favoriten), den Spielstand der laufenden Partie mit den von dir eingetragenen Spielernamen und Punkten sowie
-		deine Sprachwahl. Diese Daten bleiben auf deinem Gerät, werden nicht an uns oder Dritte übermittelt und sind für die Funktion der Anwendung
-		erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Du kannst sie jederzeit über die Website-Einstellungen deines Browsers löschen.
+		Die Seite speichert im <b>Local Storage</b> deines Browsers ausschließlich, was für das Spiel gebraucht wird: die Spiele, die du angelegt
+		oder geöffnet hast (Verlauf und Favoriten), deine eigenen Spielstände (erreichte Level und Punkte) sowie deine Sprachwahl. Diese Daten bleiben
+		auf deinem Gerät, werden nicht an uns oder Dritte übermittelt und sind für die Funktion der Anwendung erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
+		Du kannst sie jederzeit über die Website-Einstellungen deines Browsers löschen.
 	</p>
 	<p>
 		Zusätzlich merkt sich die Seite im <b>Session Storage</b> deines Browsers die Scrollposition und den Navigationsverlauf innerhalb der App,

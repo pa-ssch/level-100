@@ -35,7 +35,7 @@
 		};
 	});
 
-	let showBack = $derived(page.route.id?.endsWith('/prepare') || page.route.id?.endsWith('/play'));
+	let showBack = $derived(page.route.id !== '/' && !page.route.id?.endsWith('/start'));
 	let startHref = $derived(isLanguage(language) ? resolve('/[[language=language]]/start', { language }) : resolve('/'));
 </script>
 

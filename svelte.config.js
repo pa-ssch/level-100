@@ -2,7 +2,7 @@ import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 const languages = ['de-DE', 'en-US'];
-const pages = ['start', 'prepare', 'play'];
+const pages = ['start', 'new', 'random', 'prepare', 'play'];
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {

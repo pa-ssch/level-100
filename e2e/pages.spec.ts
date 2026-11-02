@@ -42,28 +42,32 @@ test('Sprachwechsel im Footer führt auf dieselbe Seite in der anderen Sprache',
 	await expect(page).toHaveURL(/\/de-DE\/start$/);
 });
 
-test('Regelsatz-Kacheln führen zu play und prepare, der Regelsatz steckt im Link', async ({ page }) => {
+test('Verlaufskachel: Antippen startet, Links tragen das Spiel', async ({ page }) => {
+	await page.goto('/en-US/prepare');
+	await page.getByLabel('Name').fill('Tile test');
+	await page.getByRole('button', { name: 'Done' }).click();
+	await expect(page).toHaveURL(/\/en-US\/start$/);
+	const tile = page.getByRole('article').filter({ hasText: 'Tile test' });
+	await expect(tile.getByRole('link')).toHaveAttribute('href', /\/en-US\/play\?r=[A-Za-z0-9_-]{20,}&go=1$/);
+	await tile.getByRole('link').click();
+	await expect(page.getByText('Your level')).toBeVisible();
 	await page.goto('/en-US/start');
-	await expect(page.getByRole('heading', { name: 'Ten classic levels' })).toBeVisible();
-	await page.getByRole('link', { name: 'Play: Ten classic levels' }).click();
-	await expect(page).toHaveURL(/\/en-US\/play\?r=[A-Za-z0-9_-]{20,}$/);
-	await expect(page.getByRole('heading', { name: 'Ten classic levels' })).toBeVisible();
-	await expect(page.getByRole('button', { name: 'Start game' })).toBeVisible();
-	await page.goto('/en-US/start');
-	await page.getByRole('link', { name: 'Edit: Ten classic levels' }).click();
+	await tile.getByRole('button', { name: 'Menu: Tile test' }).click();
+	await page.getByRole('menuitem', { name: 'Edit' }).click();
 	await expect(page).toHaveURL(/\/en-US\/prepare\?r=[A-Za-z0-9_-]{20,}$/);
-	await expect(page.getByLabel('Name')).toHaveValue('Ten classic levels');
-	await expect(page.getByRole('region', { name: 'Level 1', exact: true })).toContainText('2× three of a kind');
+	await expect(page.getByLabel('Name')).toHaveValue('Tile test');
 });
 
 test('ungültige Links werden abgefangen', async ({ page }) => {
 	const errors = watchErrors(page);
 	for (const route of ['/en-US/play?r=2kaputt', '/en-US/prepare?r=1' + 'A'.repeat(50), '/de-DE/play?r=' + 'x'.repeat(5000)]) {
 		await page.goto(route);
-		await expect(page.getByRole('alert')).toContainText(/valid ruleset|gültigen Regelsatz/);
+		await expect(page.getByRole('alert')).toContainText(/valid game|gültiges Spiel/);
 	}
 	await page.goto('/en-US/play');
 	await expect(page.getByText('No game open')).toBeVisible();
+	await page.goto('/en-US/start');
+	await expect(page.getByRole('link', { name: 'New game' })).toBeVisible();
 	expect(errors).toEqual([]);
 });
 

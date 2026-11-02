@@ -13,9 +13,10 @@ test('kein Request verlässt die eigene Origin', async ({ page, baseURL }) => {
 		await page.goto(route);
 		await page.waitForLoadState('networkidle');
 	}
-	await page.goto('/en-US/start');
-	await page.getByRole('link', { name: 'Play: Ten classic levels' }).click();
-	await page.getByRole('button', { name: 'Start game' }).click();
+	await page.goto('/en-US/random');
+	await page.getByRole('button', { name: 'Roll levels' }).click();
+	await page.getByRole('button', { name: 'Play' }).click();
+	await expect(page.getByText('Your level')).toBeVisible();
 	await page.getByRole('button', { name: 'Invite players' }).click();
 	await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();
 	await page.waitForLoadState('networkidle');
@@ -75,7 +76,7 @@ test.describe('Kaputter Speicher stürzt nicht ab', () => {
 			for (const bad of BAD) {
 				await page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, bad]);
 				await page.goto('/en-US/start');
-				await expect(page.getByRole('link', { name: 'New ruleset' }), `${key}=${bad.slice(0, 20)}`).toBeVisible();
+				await expect(page.getByRole('link', { name: 'New game' }), `${key}=${bad.slice(0, 20)}`).toBeVisible();
 				await page.goto('/en-US/play');
 				await expect(page.locator('main h1, main p').first(), `${key}=${bad.slice(0, 20)}`).toBeVisible();
 			}

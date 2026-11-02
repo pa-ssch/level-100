@@ -28,10 +28,10 @@ test('jede Seite hat Titel, Beschreibung, canonical, Open Graph und JSON-LD', as
 
 test('Meta-Beschreibungen folgen der Sprache der Seite', async ({ page }) => {
 	await page.goto('/de-DE/start');
-	expect(await page.getAttribute('meta[name="description"]', 'content')).toContain('Regelsätze');
+	expect(await page.getAttribute('meta[name="description"]', 'content')).toContain('Spiele');
 	expect(await page.getAttribute('meta[property="og:locale"]', 'content')).toBe('de_DE');
 	await page.goto('/en-US/start');
-	expect(await page.getAttribute('meta[name="description"]', 'content')).toContain('rulesets');
+	expect(await page.getAttribute('meta[name="description"]', 'content')).toContain('games');
 });
 
 test('Manifest, Icons, Sitemap, robots.txt und llms.txt sind erreichbar und konsistent', async ({ request }) => {

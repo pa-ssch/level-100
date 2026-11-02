@@ -45,6 +45,14 @@ describe('ruleset', () => {
 		for (const input of broken) expect(validateRuleset(input), JSON.stringify(input).slice(0, 80)).toBeNull();
 	});
 
+	it('akzeptiert alte Links ohne Punkte-Option und weist falsche Typen ab', () => {
+		const base = createRuleset({ name: 'ok' });
+		const { points: _points, ...legacy } = base;
+		void _points;
+		expect(validateRuleset(legacy)).toEqual({ ...base, points: true });
+		expect(validateRuleset({ ...base, points: 'yes' })).toBeNull();
+	});
+
 	it('entfernt unbekannte Felder', () => {
 		const base = createRuleset({ name: 'ok' });
 		const valid = validateRuleset({ ...base, extra: 1, deck: { ...base.deck, __proto__: null, x: 1 } });

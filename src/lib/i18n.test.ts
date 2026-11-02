@@ -35,7 +35,7 @@ describe('i18n', () => {
 
 	it('ersetzt Platzhalter', () => {
 		expect(t('de-DE', 'level', { n: 3 })).toBe('Level 3');
-		expect(t('en-US', 'deleteConfirm', { name: 'X' })).toBe('Delete ruleset “X”?');
+		expect(t('en-US', 'deleteConfirm', { name: 'X' })).toBe('Delete game “X”?');
 	});
 
 	it('beschreibt Anforderungen lesbar', () => {
