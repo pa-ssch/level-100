@@ -45,7 +45,7 @@ test('Sprachwechsel im Footer führt auf dieselbe Seite in der anderen Sprache',
 test('Verlaufskachel: Antippen startet, Links tragen das Spiel', async ({ page }) => {
 	await page.goto('/en-US/prepare');
 	await page.getByLabel('Name').fill('Tile test');
-	await page.getByRole('button', { name: 'Done' }).click();
+	await page.getByRole('link', { name: 'Back' }).click();
 	await expect(page).toHaveURL(/\/en-US\/start$/);
 	const tile = page.getByRole('article').filter({ hasText: 'Tile test' });
 	await expect(tile.getByRole('link')).toHaveAttribute('href', /\/en-US\/play\?r=[A-Za-z0-9_-]{20,}&go=1$/);
@@ -54,7 +54,7 @@ test('Verlaufskachel: Antippen startet, Links tragen das Spiel', async ({ page }
 	await page.goto('/en-US/start');
 	await tile.getByRole('button', { name: 'Menu: Tile test' }).click();
 	await page.getByRole('menuitem', { name: 'Edit' }).click();
-	await expect(page).toHaveURL(/\/en-US\/prepare\?r=[A-Za-z0-9_-]{20,}$/);
+	await expect(page).toHaveURL(/\/en-US\/prepare\?id=[0-9a-f-]{36}$/);
 	await expect(page.getByLabel('Name')).toHaveValue('Tile test');
 });
 

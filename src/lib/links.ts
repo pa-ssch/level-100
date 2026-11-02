@@ -7,6 +7,7 @@ import { isLanguage } from './i18n';
 type Route =
 	| '/[[language=language]]/play'
 	| '/[[language=language]]/prepare'
+	| '/[[language=language]]/deck'
 	| '/[[language=language]]/random'
 	| '/[[language=language]]/new'
 	| '/[[language=language]]/start';

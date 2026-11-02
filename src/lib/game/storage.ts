@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { isLanguage, type Language } from '$lib/i18n';
+import { validateSavedDeck, type SavedDeck } from './decks';
 import type { Game } from './game';
 import { validateRuleset, type Ruleset } from './ruleset';
 
@@ -10,8 +11,11 @@ import { validateRuleset, type Ruleset } from './ruleset';
 export const STORAGE_KEYS = {
 	rulesets: 'level100.rulesets',
 	games: 'level100.games',
+	decks: 'level100.decks',
 	language: 'level100.language'
 } as const;
+
+const MAX_STORED_DECKS = 30;
 
 const MAX_STORED_GAMES = 50;
 
@@ -154,6 +158,34 @@ export function removeGame(rulesetId: string): void {
 		STORAGE_KEYS.games,
 		loadGames().filter((g) => g.ruleset.id !== rulesetId)
 	);
+}
+
+/** Eigene Decks, zuletzt angelegte zuerst. */
+export function loadDecks(): SavedDeck[] {
+	const raw = read(STORAGE_KEYS.decks);
+	if (!Array.isArray(raw)) return [];
+	const seen = new Set<string>();
+	const out: SavedDeck[] = [];
+	for (const item of raw) {
+		const deck = validateSavedDeck(item);
+		if (deck && !seen.has(deck.id)) {
+			seen.add(deck.id);
+			out.push(deck);
+		}
+	}
+	return out;
+}
+
+export function saveDeck(deck: SavedDeck): SavedDeck[] {
+	const next = [deck, ...loadDecks().filter((d) => d.id !== deck.id)].slice(0, MAX_STORED_DECKS);
+	write(STORAGE_KEYS.decks, next);
+	return next;
+}
+
+export function removeDeck(id: string): SavedDeck[] {
+	const next = loadDecks().filter((d) => d.id !== id);
+	write(STORAGE_KEYS.decks, next);
+	return next;
 }
 
 export function loadLanguage(): Language | null {

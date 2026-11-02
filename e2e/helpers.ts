@@ -9,6 +9,7 @@ export const ROUTES = [
 	'/en-US/random',
 	'/de-DE/prepare',
 	'/en-US/prepare',
+	'/de-DE/deck',
 	'/de-DE/play',
 	'/en-US/play',
 	'/about',
@@ -46,7 +47,7 @@ export function watchErrors(page: Page, browserName?: string): string[] {
 }
 
 /** Local-Storage-Schlüssel, die die Datenschutzerklärung nennt. Alles andere ist ein Verstoß. */
-export const ALLOWED_LOCAL_STORAGE_KEYS = ['level100.rulesets', 'level100.games', 'level100.language'];
+export const ALLOWED_LOCAL_STORAGE_KEYS = ['level100.rulesets', 'level100.games', 'level100.decks', 'level100.language'];
 
 /** Session-Storage-Einträge von SvelteKit (Scrollposition, Navigationsverlauf); in der Datenschutzerklärung genannt. */
 export const ALLOWED_SESSION_STORAGE_KEYS = [

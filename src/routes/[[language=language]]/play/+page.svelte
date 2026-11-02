@@ -7,11 +7,11 @@
 	import { decodeRuleset } from '$lib/game/share';
 	import { loadGame, saveGame, saveRuleset } from '$lib/game/storage';
 	import { href } from '$lib/links';
-	import { describeLevel, t } from '$lib/i18n';
+	import { describeLevel, displayName, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
+	import InviteDialog from '$lib/components/InviteDialog.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
-	import ShareDialog from '$lib/components/ShareDialog.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -24,8 +24,8 @@
 	let view = $state<View>({ status: 'loading' });
 	let error = $state<string | null>(null);
 	let showAll = $state(false);
-	let shareOpen = $state(false);
-	/** Rundeneingabe: welches Level geschafft (null = keins) und Punkte. */
+	let inviteOpen = $state(false);
+	/** Punkteblatt: welches Level geschafft (null = keins) und Punkte. */
 	let entry = $state<{ completed: number | null; points: number } | null>(null);
 
 	$effect(() => {
@@ -62,16 +62,10 @@
 		}
 	}
 
-	function beginRound(game: Game, completed: number | null) {
-		if (game.ruleset.mode === 'free' && completed === -1) {
-			entry = { completed: null, points: 0 }; // erst Level wählen
-			return;
-		}
-		if (!game.ruleset.points) {
-			commit(game, { completed, points: 0 });
-			return;
-		}
-		entry = { completed, points: 0 };
+	/** Runde abschließen: bei Punkten erst das Punkteblatt, sonst sofort eintragen. */
+	function finishRound(game: Game, completed: number | null) {
+		if (game.ruleset.points) entry = { completed, points: 0 };
+		else commit(game, { completed, points: 0 });
 	}
 
 	function commit(game: Game, round: { completed: number | null; points: number }) {
@@ -92,7 +86,7 @@
 		view = { status: 'playing', game: next };
 	}
 
-	let shareUrl = $derived.by(() => {
+	let inviteUrl = $derived.by(() => {
 		if (!browser) return '';
 		const url = new URL(page.url);
 		url.searchParams.delete('go');
@@ -112,7 +106,7 @@
 	<p><a href={href('/[[language=language]]/start', language)}>{t(language, 'toStart')}</a></p>
 {:else if view.status === 'join'}
 	{@const ruleset = view.ruleset}
-	<h1>{ruleset.name}</h1>
+	<h1>{displayName(language, ruleset.name, ruleset.levels.length)}</h1>
 	<p class="meta">
 		{t(language, 'levelCount', { n: ruleset.levels.length })} · {t(language, 'cardCount', { n: ruleset.levels[0].handSize })} · {t(
 			language,
@@ -139,31 +133,35 @@
 	{@const finished = isFinished(game)}
 	{@const current = currentLevel(game)}
 	{@const open = openLevels(game)}
+	{@const free = ruleset.mode === 'free'}
 	<header class="top">
-		<h1>{ruleset.name}</h1>
+		<h1>{displayName(language, ruleset.name, ruleset.levels.length)}</h1>
 		<button
 			type="button"
 			class="icon-button"
-			onclick={() => (shareOpen = true)}
+			onclick={() => (inviteOpen = true)}
 			aria-label={t(language, 'invite')}
-			title={t(language, 'invite')}><Icon name="qrcode" /></button
+			title={t(language, 'invite')}><Icon name="user-plus" /></button
 		>
 	</header>
 
-	<div
-		class="progress"
-		role="img"
-		aria-label={t(language, 'levelOf', { n: (current ?? ruleset.levels.length - 1) + 1, total: ruleset.levels.length })}
-	>
-		{#each game.done as done, i (i)}
-			<i class:done class:now={i === current}></i>
-		{/each}
-	</div>
+	{#if !free}
+		<div
+			class="progress"
+			role="img"
+			aria-label={t(language, 'levelOf', { n: (current ?? ruleset.levels.length - 1) + 1, total: ruleset.levels.length })}
+		>
+			{#each game.done as done, i (i)}
+				<i class:done class:now={i === current}></i>
+			{/each}
+		</div>
+	{/if}
 	<p class="meta center">
-		{#if finished}{t(language, 'finishedStatus')}{:else}{t(language, 'levelOf', {
-				n: (current ?? 0) + 1,
-				total: ruleset.levels.length
-			})}{/if}
+		{#if finished}{t(language, 'finishedStatus')}{:else if free}{t(language, 'levelCount', { n: open.length })}{:else}{t(
+				language,
+				'levelOf',
+				{ n: (current ?? 0) + 1, total: ruleset.levels.length }
+			)}{/if}
 		{#if ruleset.points}· {t(language, 'pointsTotal', { n: game.points })}{/if}
 	</p>
 
@@ -181,7 +179,7 @@
 			<button type="button" class="primary big" onclick={() => again(game)}><Icon name="rotate-right" /> {t(language, 'playAgain')}</button>
 			<a class="button" href={href('/[[language=language]]/start', language)}>{t(language, 'toHistory')}</a>
 		</div>
-	{:else if ruleset.mode === 'fixed' && current !== null}
+	{:else if !free && current !== null}
 		{@const level = ruleset.levels[current]}
 		<section class="hero">
 			<div class="lvl">{t(language, 'yourLevel')}</div>
@@ -193,97 +191,82 @@
 			</div>
 		</section>
 		<div class="actions">
-			<button type="button" class="primary big" onclick={() => beginRound(game, current)}
+			<button type="button" class="primary big" onclick={() => finishRound(game, current)}
 				><Icon name="check" /> {t(language, 'completed')}</button
 			>
 		</div>
 		{#if ruleset.points}
 			<div class="actions">
-				<button type="button" class="secondary wide" onclick={() => beginRound(game, null)}>{t(language, 'notCompleted')}</button>
+				<button type="button" class="secondary wide" onclick={() => finishRound(game, null)}>{t(language, 'notCompleted')}</button>
 			</div>
 		{/if}
 		{#if current + 1 < ruleset.levels.length}
 			<p class="meta center">{t(language, 'nextLevel', { d: describeLevel(language, ruleset.levels[current + 1].requirements) })}</p>
 		{/if}
 	{:else}
-		<section class="hero">
-			<div class="lvl">{t(language, 'openLevelsTitle')}</div>
-			<ul class="open">
-				{#each open as i (i)}
-					<li><strong>{t(language, 'level', { n: i + 1 })}</strong>: {describeLevel(language, ruleset.levels[i].requirements)}</li>
-				{/each}
-			</ul>
-		</section>
-		<div class="actions">
-			<button type="button" class="primary big" onclick={() => beginRound(game, -1)}
-				><Icon name="check" /> {t(language, 'completed')}</button
-			>
+		<!-- Freie Reihenfolge: jedes offene Level ist eine Kachel; Antippen = geschafft. Erledigte bleiben als Fortschritt sichtbar. -->
+		<p class="meta center">{t(language, 'whichLevel')}</p>
+		<div class="tiles">
+			{#each ruleset.levels as level, i (i)}
+				<button type="button" class="tile" class:done={game.done[i]} disabled={game.done[i]} onclick={() => finishRound(game, i)}>
+					{#if game.done[i]}<Icon name="check" />{/if}
+					<span>{describeLevel(language, level.requirements)}</span>
+				</button>
+			{/each}
+			{#if ruleset.points}
+				<button type="button" class="tile none" onclick={() => finishRound(game, null)}>
+					<span>{t(language, 'notCompleted')}</span>
+				</button>
+			{/if}
 		</div>
-		{#if ruleset.points}
-			<div class="actions">
-				<button type="button" class="secondary wide" onclick={() => beginRound(game, null)}>{t(language, 'notCompleted')}</button>
-			</div>
-		{/if}
 	{/if}
 
-	<p class="center">
-		<button type="button" class="secondary" onclick={() => (showAll = !showAll)} aria-expanded={showAll}
-			>{showAll ? t(language, 'hideAll') : t(language, 'showAll')}</button
-		>
-	</p>
-	{#if showAll}
-		<ol class="levels">
-			{#each ruleset.levels as level, i (i)}
-				<li class:done={game.done[i]}>
-					{describeLevel(language, level.requirements)} <small>({t(language, 'cardCount', { n: level.handSize })})</small>
-				</li>
-			{/each}
-		</ol>
+	{#if !free}
+		<p class="center">
+			<button type="button" class="secondary" onclick={() => (showAll = !showAll)} aria-expanded={showAll}
+				>{showAll ? t(language, 'hideAll') : t(language, 'showAll')}</button
+			>
+		</p>
+		{#if showAll}
+			<ol class="levels">
+				{#each ruleset.levels as level, i (i)}
+					<li class:done={game.done[i]}>
+						{describeLevel(language, level.requirements)} <small>({t(language, 'cardCount', { n: level.handSize })})</small>
+					</li>
+				{/each}
+			</ol>
+		{/if}
 	{/if}
 
 	{#if entry}
 		{@const draft = entry}
-		<Sheet
-			title={ruleset.mode === 'free' && draft.completed === null ? t(language, 'whichLevel') : t(language, 'pointsSheet')}
-			{language}
-			onclose={() => (entry = null)}
-		>
-			{#if ruleset.mode === 'free' && draft.completed === null}
-				<div class="choices">
-					{#each open as i (i)}
-						<button type="button" onclick={() => (ruleset.points ? (draft.completed = i) : commit(game, { completed: i, points: 0 }))}
-							><strong>{t(language, 'level', { n: i + 1 })}</strong> {describeLevel(language, ruleset.levels[i].requirements)}</button
-						>
+		<Sheet title={t(language, 'pointsSheet')} {language} onclose={() => (entry = null)}>
+			<form
+				class="points"
+				onsubmit={(e) => {
+					e.preventDefault();
+					commit(game, { completed: draft.completed, points: draft.points });
+				}}
+			>
+				<label>
+					<span class="visually-hidden">{t(language, 'pointsSheet')}</span>
+					<input
+						type="number"
+						inputmode="numeric"
+						min={GAME_LIMITS.points.min}
+						max={GAME_LIMITS.points.max}
+						step="1"
+						bind:value={draft.points}
+					/>
+				</label>
+				<div class="quick">
+					{#each [5, 10, 15, 20, 25] as n (n)}
+						<button type="button" onclick={() => (draft.points = Math.min(GAME_LIMITS.points.max, (draft.points || 0) + n))}>+{n}</button>
 					{/each}
+					<button type="button" onclick={() => (draft.points = 0)}>0</button>
 				</div>
-			{:else}
-				<form
-					class="points"
-					onsubmit={(e) => {
-						e.preventDefault();
-						commit(game, { completed: draft.completed, points: draft.points });
-					}}
-				>
-					<label>
-						<span class="visually-hidden">{t(language, 'pointsSheet')}</span>
-						<input
-							type="number"
-							inputmode="numeric"
-							min={GAME_LIMITS.points.min}
-							max={GAME_LIMITS.points.max}
-							step="1"
-							bind:value={draft.points}
-						/>
-					</label>
-					<div class="quick">
-						{#each [5, 10, 15, 20, 25] as n (n)}
-							<button type="button" onclick={() => (draft.points = Math.min(GAME_LIMITS.points.max, (draft.points || 0) + n))}>+{n}</button>
-						{/each}
-						<button type="button" onclick={() => (draft.points = 0)}>0</button>
-					</div>
-					<button type="submit" class="primary big">{t(language, 'done')}</button>
-				</form>
-			{/if}
+				<button type="submit" class="primary big">{t(language, 'done')}</button>
+			</form>
 		</Sheet>
 	{/if}
 {/if}
@@ -291,8 +274,8 @@
 {#if error}
 	<p class="warn-text" role="alert">{t(language, 'unexpectedError')}: {error}</p>
 {/if}
-{#if shareOpen && shareUrl}
-	<ShareDialog url={shareUrl} {language} onclose={() => (shareOpen = false)} />
+{#if inviteOpen && inviteUrl}
+	<InviteDialog url={inviteUrl} {language} onclose={() => (inviteOpen = false)} />
 {/if}
 
 <style lang="scss">
@@ -365,16 +348,38 @@
 			opacity: 0.75;
 			font-size: 0.9em;
 		}
-
-		&.finished {
-			border-color: var(--accent);
-		}
 	}
 
-	.open {
-		text-align: left;
-		margin: 8px 0 0;
-		padding-left: 1.2em;
+	.tiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 10px;
+		margin: 12px 0;
+
+		.tile {
+			flex-direction: column;
+			justify-content: center;
+			gap: 6px;
+			min-height: 92px;
+			padding: 14px 10px;
+			text-align: center;
+			font-weight: bold;
+			border: 2px solid var(--accent);
+			border-radius: 14px;
+			font-size: 1.05em;
+
+			&.done {
+				border-color: var(--border);
+				opacity: 0.45;
+				text-decoration: line-through;
+			}
+
+			&.none {
+				border-style: dashed;
+				border-color: var(--border);
+				font-weight: normal;
+			}
+		}
 	}
 
 	.actions {
@@ -416,19 +421,6 @@
 				opacity: 0.5;
 				text-decoration: line-through;
 			}
-		}
-	}
-
-	.choices {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-
-		button {
-			justify-content: flex-start;
-			gap: 8px;
-			padding: 12px;
-			text-align: left;
 		}
 	}
 

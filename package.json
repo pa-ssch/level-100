@@ -48,6 +48,7 @@
 		"vitest": "^4.1.12"
 	},
 	"dependencies": {
+		"jsqr": "^1.4.0",
 		"qrcode": "^1.5.4"
 	}
 }

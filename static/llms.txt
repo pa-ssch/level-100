@@ -11,6 +11,7 @@ Level 100 is an independent project with no affiliation to "Phase 10", "Stufe 10
 - Level order: "in order" (classic) or "free choice" (the player decides which open level they completed when going out).
 - Sharing: the whole ruleset is compressed and encoded into the link (`/de-DE/play?r=…` or `/en-US/play?r=…`); a QR code is generated on the device. There is no server that stores or resolves links.
 - Play: one phone per player. Each device shows its owner's current level and points; after each round you tap "completed" or "not completed" and enter the points left in hand. Game state is kept in the browser's local storage.
+- Joining: scan a QR code with the in-app scanner (camera, decoded on the device) or paste a link. Inviting: show a QR code or send the link.
 - Languages: German (`/de-DE/…`) and English (`/en-US/…`).
 
 ## Pages
@@ -27,7 +28,7 @@ Level 100 is an independent project with no affiliation to "Phase 10", "Stufe 10
 ## Technical facts
 
 - Static site built with SvelteKit, hosted on GitHub Pages, source code under the MIT licence: https://github.com/pa-ssch/level-100
-- Privacy: no third-party requests, no cookies, strict Content Security Policy; local storage keys `level100.rulesets`, `level100.games`, `level100.language`.
+- Privacy: no third-party requests, no cookies, strict Content Security Policy; local storage keys `level100.rulesets`, `level100.games`, `level100.decks`, `level100.language`.
 - Contact: lvl100@9xb.de (operator: 9xb, Silas Schnurr, Bühl, Germany)
 
 # Level 100 (Deutsch)

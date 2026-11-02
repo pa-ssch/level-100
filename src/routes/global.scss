@@ -61,6 +61,8 @@ input,
 select,
 textarea {
 	font: inherit;
+	/* iOS Safari zoomt beim Fokus in Felder mit Schrift unter 16 px hinein. */
+	font-size: max(16px, 1em);
 	color: var(--foreground);
 	background-color: var(--surface);
 	border: 1px solid var(--border);

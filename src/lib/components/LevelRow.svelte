@@ -14,27 +14,52 @@
 		deck,
 		language,
 		editable = false,
+		dragging = false,
 		menu = [],
 		onaddblock,
 		onremoveblock,
-		onreroll
+		onreroll,
+		ondragstart,
+		ondragmove,
+		ondragend
 	}: {
 		level: Level;
 		index: number;
 		deck: CardDeck;
 		language: string | undefined;
 		editable?: boolean;
+		dragging?: boolean;
 		menu?: MenuItem[];
 		onaddblock?: () => void;
 		onremoveblock?: (i: number) => void;
 		onreroll?: () => void;
+		ondragstart?: (e: PointerEvent) => void;
+		ondragmove?: (e: PointerEvent) => void;
+		ondragend?: (e: PointerEvent) => void;
 	} = $props();
 
 	let estimate = $derived(estimateDifficulty(deck, level.handSize, level.requirements));
 	let tooMany = $derived(levelCards(level.requirements) > level.handSize);
 </script>
 
-<div class="level" class:editable aria-label={t(language, 'level', { n: index + 1 })} role="group">
+<div class="level" class:editable class:dragging aria-label={t(language, 'level', { n: index + 1 })} role="group" data-level-index={index}>
+	{#if ondragstart}
+		<button
+			type="button"
+			class="icon-button grip"
+			aria-label={t(language, 'dragHandle', { n: index + 1 })}
+			title={t(language, 'dragHandle', { n: index + 1 })}
+			onpointerdown={(e) => {
+				(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+				ondragstart?.(e);
+			}}
+			onpointermove={ondragmove}
+			onpointerup={ondragend}
+			onpointercancel={ondragend}
+		>
+			<Icon name="grip-vertical" />
+		</button>
+	{/if}
 	<span class="n">{index + 1}</span>
 	<div class="body">
 		{#if editable}
@@ -82,12 +107,28 @@
 	.level {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
 		border: 1px solid var(--border);
 		background: var(--surface);
 		border-radius: 10px;
-		padding: 8px 6px 8px 12px;
+		padding: 8px 6px 8px 10px;
 		margin: 6px 0;
+
+		&.dragging {
+			border-color: var(--accent);
+			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+		}
+
+		.grip {
+			touch-action: none;
+			cursor: grab;
+			opacity: 0.6;
+			padding: 10px 4px;
+
+			&:active {
+				cursor: grabbing;
+			}
+		}
 
 		.n {
 			font-weight: bold;

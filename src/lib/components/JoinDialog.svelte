@@ -1,29 +1,40 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { href } from '$lib/links';
+	import { payloadFromScan } from '$lib/qr';
 	import { t } from '$lib/i18n';
+	import QrScanner from './QrScanner.svelte';
 	import Sheet from './Sheet.svelte';
 
 	let { language, onclose }: { language: string | undefined; onclose: () => void } = $props();
 	let link = $state('');
 	let invalid = $state(false);
+	let done = false;
 
-	function open(event: Event) {
+	function openPayload(r: string) {
+		if (done) return;
+		done = true;
+		onclose();
+		goto(href('/[[language=language]]/play', language, { r }));
+	}
+
+	function scanned(text: string) {
+		const r = payloadFromScan(text);
+		if (r) openPayload(r);
+		else invalid = true;
+	}
+
+	function submit(event: Event) {
 		event.preventDefault();
-		try {
-			const url = new URL(link.trim());
-			const r = url.searchParams.get('r');
-			if (!r) throw new Error('no payload');
-			onclose();
-			goto(href('/[[language=language]]/play', language, { r }));
-		} catch {
-			invalid = true;
-		}
+		const r = payloadFromScan(link.trim());
+		if (r) openPayload(r);
+		else invalid = true;
 	}
 </script>
 
 <Sheet title={t(language, 'joinTitle')} {language} {onclose}>
-	<form onsubmit={open}>
+	<QrScanner {language} onscan={scanned} />
+	<form onsubmit={submit}>
 		<label>
 			{t(language, 'joinPaste')}
 			<input
@@ -47,6 +58,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
+		margin-top: 14px;
 	}
 
 	label {

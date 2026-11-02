@@ -35,7 +35,7 @@ yarn preview    # Build lokal ansehen
 - `src/lib/site.ts`, `src/lib/seo.ts`, `src/lib/components/Seo.svelte` – Site-Konstanten, JSON-LD, Meta-Tags (canonical, hreflang, Open Graph)
 - `static/` – `CNAME`, `robots.txt`, `llms.txt`, `manifest.webmanifest`, Icons (`icons/icon.svg` ist die Quelle der PNGs)
 
-Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.games` (Spielstände, ein Spieler je Gerät), `level100.language`.
+Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.games` (Spielstände, ein Spieler je Gerät), `level100.decks` (eigene Decks), `level100.language`.
 
 Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Die Content-Security-Policy steht als Meta-Tag in jeder
 Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0). Spielzustand und geteilte Regelsätze leben

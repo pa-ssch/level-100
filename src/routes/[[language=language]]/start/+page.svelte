@@ -5,12 +5,12 @@
 	import type { Ruleset } from '$lib/game/ruleset';
 	import { loadGames, loadRulesets, removeRuleset, toggleFavorite, type StoredRuleset } from '$lib/game/storage';
 	import { href, rulesetLinks, type RulesetLinks } from '$lib/links';
-	import { t } from '$lib/i18n';
+	import { displayName, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
 	import JoinDialog from '$lib/components/JoinDialog.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import Seo from '$lib/components/Seo.svelte';
-	import ShareDialog from '$lib/components/ShareDialog.svelte';
+	import InviteDialog from '$lib/components/InviteDialog.svelte';
 	import { goto } from '$app/navigation';
 
 	let language = $derived(page.params.language);
@@ -50,7 +50,7 @@
 	}
 
 	function name(ruleset: Ruleset): string {
-		return ruleset.name.trim() || t(language, 'unnamed');
+		return displayName(language, ruleset.name, ruleset.levels.length);
 	}
 
 	function remove(ruleset: Ruleset) {
@@ -63,7 +63,7 @@
 	function menuFor(stored: StoredRuleset) {
 		const l = links[stored.ruleset.id];
 		return [
-			{ label: t(language, 'edit'), onselect: () => goto(l.edit) },
+			{ label: t(language, 'edit'), onselect: () => goto(href('/[[language=language]]/prepare', language, { id: stored.ruleset.id })) },
 			{ label: t(language, 'share'), onselect: () => (shareUrl = l.share) },
 			{ label: t(language, 'duplicate'), onselect: () => goto(l.duplicate) },
 			{ label: t(language, 'delete'), onselect: () => remove(stored.ruleset), danger: true }
@@ -129,7 +129,7 @@
 {/if}
 
 {#if shareUrl}
-	<ShareDialog url={shareUrl} {language} onclose={() => (shareUrl = null)} />
+	<InviteDialog url={shareUrl} {language} onclose={() => (shareUrl = null)} />
 {/if}
 {#if joinOpen}
 	<JoinDialog {language} onclose={() => (joinOpen = false)} />

@@ -11,6 +11,8 @@ const pages = [
 	{ path: '/de-DE/random', alternates: true },
 	{ path: '/en-US/random', alternates: true },
 	{ path: '/de-DE/prepare', alternates: true },
+	{ path: '/de-DE/deck', alternates: true },
+	{ path: '/en-US/deck', alternates: true },
 	{ path: '/en-US/prepare', alternates: true },
 	{ path: '/about', alternates: false },
 	{ path: '/imprint', alternates: false }

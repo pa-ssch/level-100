@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { DECK_PRESETS, deckSize, type CardDeck } from '$lib/game/deck';
+	import type { CardDeck } from '$lib/game/deck';
 	import { createGame } from '$lib/game/game';
 	import {
 		LEVELS_PER_DURATION,
@@ -15,20 +15,19 @@
 		type Duration
 	} from '$lib/game/generator';
 	import { RULESET_LIMITS, createRuleset, type Level, type Ruleset } from '$lib/game/ruleset';
-	import { saveGame, saveRuleset } from '$lib/game/storage';
+	import { loadDecks, saveGame, saveRuleset } from '$lib/game/storage';
 	import { href, rulesetLinks } from '$lib/links';
 	import { t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
 	import DeckPicker from '$lib/components/DeckPicker.svelte';
 	import LevelRow from '$lib/components/LevelRow.svelte';
-	import MoreOptions from '$lib/components/MoreOptions.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import Seo from '$lib/components/Seo.svelte';
-	import ShareDialog from '$lib/components/ShareDialog.svelte';
+	import Switch from '$lib/components/Switch.svelte';
 
 	let language = $derived(page.params.language);
 
-	// Vorgaben; der Regelsatz hält Deck und die „Mehr“-Optionen, die Level kommen aus dem Generator.
+	// Vorgaben; der Regelsatz hält Deck und Optionen, die Level kommen aus dem Generator.
 	let ruleset = $state<Ruleset>(
 		createRuleset({ name: '', levels: [{ requirements: [{ kind: 'set', size: 3, count: 2 }], handSize: 10 }] })
 	);
@@ -38,16 +37,23 @@
 	let seed = $state(1);
 	let candidates: Candidate[] = [];
 	let candidateKey = '';
-	let shareUrl = $state<string | null>(null);
 
 	const durations: Duration[] = ['short', 'medium', 'long'];
 	const difficulties: DifficultyPreset[] = ['easy', 'medium', 'hard'];
 	const difficultyLabel: Record<DifficultyPreset, 'easy' | 'mediumDiff' | 'hard'> = { easy: 'easy', medium: 'mediumDiff', hard: 'hard' };
 
-	function setDeck(deck: CardDeck) {
+	// Zurück aus der Deck-Ansicht: das neue Deck übernehmen
+	$effect(() => {
+		if (!browser) return;
+		const deckId = page.url.searchParams.get('deck');
+		if (!deckId) return;
+		const saved = loadDecks().find((d) => d.id === deckId);
+		if (saved) setDeck({ ...saved.deck }, saved.handSize);
+	});
+
+	function setDeck(deck: CardDeck, handSize: number) {
 		ruleset.deck = deck;
-		const handSize = JSON.stringify(deck) === JSON.stringify(DECK_PRESETS.poker) ? 7 : 10;
-		for (const level of ruleset.levels) level.handSize = Math.min(handSize, deckSize(deck));
+		for (const level of ruleset.levels) level.handSize = handSize;
 	}
 
 	function ensureCandidates(): Candidate[] {
@@ -93,7 +99,7 @@
 
 	function finalRuleset(): Ruleset {
 		const r = $state.snapshot(ruleset) as Ruleset;
-		r.name = r.name.trim().slice(0, RULESET_LIMITS.name) || t(language, 'unnamed');
+		r.name = r.name.trim().slice(0, RULESET_LIMITS.name);
 		return r;
 	}
 
@@ -104,16 +110,10 @@
 		await goto((await rulesetLinks(r, language, page.url.origin)).play);
 	}
 
-	async function share() {
-		const r = finalRuleset();
-		saveRuleset(r);
-		shareUrl = (await rulesetLinks(r, language, page.url.origin)).share;
-	}
-
 	async function adjust() {
 		const r = finalRuleset();
 		saveRuleset(r);
-		await goto((await rulesetLinks(r, language, page.url.origin)).edit);
+		await goto(href('/[[language=language]]/prepare', language, { id: r.id }));
 	}
 
 	let minutes = $derived((d: Duration) => t(language, 'minutes', { m: LEVELS_PER_DURATION[d] * MINUTES_PER_LEVEL }));
@@ -125,7 +125,12 @@
 	<h1>{t(language, 'randomScreen')}</h1>
 
 	<h2 class="q">{t(language, 'deckQ')}</h2>
-	<DeckPicker deck={ruleset.deck} {language} onchange={setDeck} />
+	<DeckPicker
+		deck={ruleset.deck}
+		{language}
+		newDeckHref={href('/[[language=language]]/deck', language, { return: 'random' })}
+		onchange={setDeck}
+	/>
 
 	<h2 class="q">{t(language, 'durationQ')}</h2>
 	<Segmented
@@ -148,7 +153,22 @@
 	/>
 	<p class="hint">{t(language, 'sortedHint')}</p>
 
-	<MoreOptions {ruleset} {language} showDeck />
+	<div class="toggles">
+		<Switch
+			id="mode"
+			checked={ruleset.mode === 'free'}
+			onLabel={t(language, 'orderToggleFree')}
+			offLabel={t(language, 'orderToggle')}
+			onchange={(v) => (ruleset.mode = v ? 'free' : 'fixed')}
+		/>
+		<Switch
+			id="points"
+			checked={ruleset.points}
+			onLabel={t(language, 'pointsToggle')}
+			offLabel={t(language, 'pointsToggleOff')}
+			onchange={(v) => (ruleset.points = v)}
+		/>
+	</div>
 
 	<div class="actions">
 		<button type="button" class="primary big" onclick={roll} disabled={step === 'rolling' || !browser}>
@@ -170,24 +190,11 @@
 	<div class="actions">
 		<button type="button" onclick={roll}><Icon name="rotate-right" /> {t(language, 'rerollAll')}</button>
 		<button type="button" onclick={adjust}><Icon name="pen" /> {t(language, 'adjust')}</button>
-		<button type="button" onclick={share}><Icon name="qrcode" /> {t(language, 'share')}</button>
 	</div>
 	<div class="actions">
 		<button type="button" class="primary big" onclick={play}><Icon name="play" /> {t(language, 'play')}</button>
 	</div>
-	<p class="hint">
-		<a
-			href={href('/[[language=language]]/random', language)}
-			onclick={(e) => {
-				e.preventDefault();
-				step = 'setup';
-			}}>{t(language, 'back')}</a
-		>
-	</p>
-{/if}
-
-{#if shareUrl}
-	<ShareDialog url={shareUrl} {language} onclose={() => (shareUrl = null)} />
+	<p class="hint"><button type="button" class="secondary" onclick={() => (step = 'setup')}>{t(language, 'back')}</button></p>
 {/if}
 
 <style lang="scss">
@@ -203,6 +210,10 @@
 	.hint {
 		opacity: 0.7;
 		font-size: 0.9em;
+	}
+
+	.toggles {
+		margin: 12px 0 4px;
 	}
 
 	.name {

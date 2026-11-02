@@ -108,14 +108,21 @@
 	<h2>Lokale Speicherung im Browser</h2>
 	<p>
 		Die Seite speichert im <b>Local Storage</b> deines Browsers ausschließlich, was für das Spiel gebraucht wird: die Spiele, die du angelegt
-		oder geöffnet hast (Verlauf und Favoriten), deine eigenen Spielstände (erreichte Level und Punkte) sowie deine Sprachwahl. Diese Daten bleiben
-		auf deinem Gerät, werden nicht an uns oder Dritte übermittelt und sind für die Funktion der Anwendung erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
-		Du kannst sie jederzeit über die Website-Einstellungen deines Browsers löschen.
+		oder geöffnet hast (Verlauf und Favoriten), deine eigenen Spielstände (erreichte Level und Punkte), selbst angelegte Kartendecks sowie deine
+		Sprachwahl. Diese Daten bleiben auf deinem Gerät, werden nicht an uns oder Dritte übermittelt und sind für die Funktion der Anwendung erforderlich
+		(§ 25 Abs. 2 Nr. 2 TDDDG). Du kannst sie jederzeit über die Website-Einstellungen deines Browsers löschen.
 	</p>
 	<p>
 		Zusätzlich merkt sich die Seite im <b>Session Storage</b> deines Browsers die Scrollposition und den Navigationsverlauf innerhalb der App,
 		damit die Zurück-Taste wie gewohnt funktioniert. Diese technischen Einträge enthalten keine personenbezogenen Daten und werden gelöscht, sobald
 		du den Browser-Tab schließt.
+	</p>
+
+	<h2>Kamera zum Scannen von QR-Codes</h2>
+	<p>
+		Beim „Spiel beitreten“ kannst du den QR-Code eines Mitspielers mit der Kamera scannen. Der Browser fragt dich dafür um Erlaubnis. Die
+		Kamerabilder werden ausschließlich auf deinem Gerät nach einem QR-Code durchsucht und weder gespeichert noch übertragen. Sobald du das
+		Blatt schließt, wird die Kamera wieder freigegeben. Ohne Kamera kannst du den Link stattdessen einfügen.
 	</p>
 
 	<h2>Geteilte Links und QR-Codes</h2>

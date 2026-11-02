@@ -18,7 +18,13 @@ test('kein Request verlässt die eigene Origin', async ({ page, baseURL }) => {
 	await page.getByRole('button', { name: 'Play' }).click();
 	await expect(page.getByText('Your level')).toBeVisible();
 	await page.getByRole('button', { name: 'Invite players' }).click();
+	await page.getByRole('button', { name: 'Show QR code' }).click();
 	await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();
+	await page.getByRole('button', { name: 'Close' }).click();
+	// Beitreten-Blatt mit Kamera (ohne Gerät: Hinweis) und Link-Feld
+	await page.goto('/en-US/start');
+	await page.getByRole('button', { name: 'Join a game' }).click();
+	await expect(page.getByLabel('Link to the game')).toBeVisible();
 	await page.waitForLoadState('networkidle');
 	expect(foreign).toEqual([]);
 });

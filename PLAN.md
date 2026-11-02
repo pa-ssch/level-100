@@ -168,6 +168,8 @@ Konzept: https://claude.ai/artifact/W31WQaP7wZE9YGAu4TjEer. Entscheidungen: Punk
 - [x] Selbst (S4): Level aus Bausteinen (`blocks.ts`, Blatt mit häufigen Bausteinen, „Mehr Bausteine“ mit festem Wert und Freitext), Level-Menü, nach Schwierigkeit sortieren, „Mehr“ für Handkarten, Reihenfolge, Punkte.
 - [x] Spielen (S5): Fortschritt, eigenes Level groß, „Level geschafft“ / „Runde vorbei, nicht geschafft“, Punkteblatt mit Schnellwerten, freier Modus mit Levelwahl, Ende mit „Nochmal spielen“, Einladen per QR.
 - [x] Beitreten (S6): Name, Level-Vorschau, „Mitspielen“ in einem Tap; `?go=1` aus dem eigenen Verlauf überspringt die Ansicht.
+- [x] Rückmeldung vom 2.11.2026 umgesetzt: Drag & Drop der Level (Griff links), kein „Fertig“/„Teilen“ im Editor (Autosave, Zurück speichert), Name optional („Eigenes Spiel · n Level“), neutrale Auswahl bei „Neues Spiel“, Decks als eigene Ansicht (`/deck`) mit gespeicherten Decks (`level100.decks`, Löschen mit Rückfrage), Reihenfolge/Punkte als Schalter über „Spielen“, freier Modus als Kacheln ohne Nummern und ohne Fortschrittsleiste, „Spieler einladen“ mit „QR-Code anzeigen“ / „Link senden“ (Web Share oder Kopieren), QR-Scanner beim Beitreten (Kamera, lokal dekodiert; Fake-Kamera-Test in Chromium), Eingabefelder mindestens 16 px gegen den iOS-Zoom.
+- [ ] Decks auch außerhalb des Editors pflegen (eigene Ansicht in der Navigation).
 - [ ] Minuten je Level nachmessen und `MINUTES_PER_LEVEL` anpassen.
 - [ ] Auf echten Geräten prüfen (Blatt-Dialoge, Menü, Tastatur beim Punkteblatt).
 

@@ -12,7 +12,7 @@
 
 <h1>{t(language, 'newTitle')}</h1>
 <div class="choices">
-	<a class="choice primary" href={href('/[[language=language]]/random', language)}>
+	<a class="choice" href={href('/[[language=language]]/random', language)}>
 		<Icon name="dice" />
 		<span><strong>{t(language, 'randomTitle')}</strong><small>{t(language, 'randomHint')}</small></span>
 	</a>
@@ -54,11 +54,6 @@
 		small {
 			font-size: 0.8em;
 			opacity: 0.75;
-		}
-
-		&.primary {
-			border-color: var(--accent);
-			border-width: 2px;
 		}
 
 		&:hover {
