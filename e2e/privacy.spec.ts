@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ALLOWED_LOCAL_STORAGE_KEYS, ALLOWED_SESSION_STORAGE_KEYS, ROUTES, watchErrors } from './helpers';
+import { ALLOWED_LOCAL_STORAGE_KEYS, ALLOWED_SESSION_STORAGE_KEYS, ROUTES, visit, watchErrors } from './helpers';
 
 // Was die Datenschutzerklärung verspricht, wird hier gegen das tatsächliche Verhalten geprüft.
 
@@ -10,7 +10,7 @@ test('kein Request verlässt die eigene Origin', async ({ page, baseURL }) => {
 		if (new URL(r.url()).origin !== origin) foreign.push(r.url());
 	});
 	for (const route of ROUTES) {
-		await page.goto(route);
+		await visit(page, route);
 		await page.waitForLoadState('networkidle');
 	}
 	await page.goto('/en-US/random');
@@ -24,7 +24,7 @@ test('kein Request verlässt die eigene Origin', async ({ page, baseURL }) => {
 });
 
 test('keine Cookies, nur dokumentierte Local- und Session-Storage-Einträge', async ({ page, context }) => {
-	for (const route of ROUTES) await page.goto(route);
+	for (const route of ROUTES) await visit(page, route);
 	expect(await context.cookies()).toEqual([]);
 	expect(await page.evaluate(() => document.cookie)).toBe('');
 	const storage = await page.evaluate(() => ({ local: Object.keys(localStorage).sort(), session: Object.keys(sessionStorage).sort() }));
@@ -35,7 +35,7 @@ test('keine Cookies, nur dokumentierte Local- und Session-Storage-Einträge', as
 
 test('jede Seite trägt eine CSP ohne unsafe-inline und erlaubt Zoom', async ({ page }) => {
 	for (const route of ROUTES) {
-		await page.goto(route);
+		await visit(page, route);
 		const csp = await page.getAttribute('meta[http-equiv="content-security-policy" i]', 'content');
 		expect(csp, route).toContain("default-src 'self'");
 		expect(csp, route).toContain("object-src 'none'");
@@ -75,9 +75,9 @@ test.describe('Kaputter Speicher stürzt nicht ab', () => {
 			await page.goto('/en-US/start');
 			for (const bad of BAD) {
 				await page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, bad]);
-				await page.goto('/en-US/start');
+				await visit(page, '/en-US/start');
 				await expect(page.getByRole('link', { name: 'New game' }), `${key}=${bad.slice(0, 20)}`).toBeVisible();
-				await page.goto('/en-US/play');
+				await visit(page, '/en-US/play');
 				await expect(page.locator('main h1, main p').first(), `${key}=${bad.slice(0, 20)}`).toBeVisible();
 			}
 			expect(errors).toEqual([]);

@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { ROUTES } from './helpers';
+import { ROUTES, visit } from './helpers';
 
 const SITE = 'https://lvl100.de';
 
 test('jede Seite hat Titel, Beschreibung, canonical, Open Graph und JSON-LD', async ({ page }) => {
 	for (const route of ROUTES) {
-		await page.goto(route);
+		await visit(page, route);
 		await expect(page, route).toHaveTitle(/Level 100/);
 		expect((await page.getAttribute('meta[name="description"]', 'content'))?.length, route).toBeGreaterThan(50);
 		// „/“ leitet clientseitig auf die Sprach-Startseite weiter, deshalb gilt der Pfad nach der Weiterleitung.

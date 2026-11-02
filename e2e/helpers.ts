@@ -22,6 +22,15 @@ const WEBKIT_SELECT_QUIRK = /Refused to apply a stylesheet because its hash, its
 // seines Storage-Backends als pageerror; die App fängt Storage-Fehler selbst ab (storage.ts).
 const WEBKIT_STORAGE_QUIRK = /NotReadableError: The I\/O read operation failed/;
 
+/** Öffnet eine Route vollständig. „/“ leitet clientseitig weiter, deshalb erst die Zielseite abwarten. */
+export async function visit(page: Page, route: string): Promise<void> {
+	await page.goto(route);
+	if (route === '/') await page.waitForURL(/\/(de-DE|en-US)\/start$/);
+	// Auch das Nachladen von Stylesheets/Chunks abwarten: eine sofort folgende Navigation würde es abbrechen,
+	// und Vite meldet das (nur dann) als Fehler.
+	await page.waitForLoadState('networkidle');
+}
+
 /** Sammelt Fehler aus der Konsole, unbehandelte Exceptions und CSP-Verstöße. */
 export function watchErrors(page: Page, browserName?: string): string[] {
 	const errors: string[] = [];
