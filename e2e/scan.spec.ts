@@ -7,8 +7,8 @@ import { createRuleset } from '../src/lib/game/ruleset';
 import { watchErrors } from './helpers';
 
 /**
- * QR-Scanner mit Chromiums Fake-Kamera: ein Y4M-Video mit dem QR-Code eines Share-Links wird als Kamerabild
- * eingespielt. Das Video muss vor dem Browserstart existieren, deshalb entsteht es beim Laden der Datei.
+ * QR-Scanner mit Chromiums Fake-Kamera (Projekt „scan“ in playwright.config.ts): ein Y4M-Video mit dem QR-Code
+ * eines Share-Links wird als Kamerabild eingespielt. Es muss vor dem Browserstart existieren, deshalb entsteht es beim Laden der Datei.
  */
 const videoPath = resolve('test-results/fake-camera.y4m');
 const SHARED = createRuleset({
@@ -44,15 +44,7 @@ function y4mWithQr(text: string, width: number, height: number): Buffer {
 	return Buffer.concat([header, ...Array(10).fill(frame)]);
 }
 
-test.use({
-	permissions: ['camera'],
-	launchOptions: {
-		args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', `--use-file-for-fake-video-capture=${videoPath}`]
-	}
-});
-
 test('QR-Code scannen führt direkt zur Beitreten-Ansicht', async ({ page, browserName }) => {
-	test.skip(browserName !== 'chromium', 'Fake-Kamera gibt es nur in Chromium');
 	const errors = watchErrors(page, browserName);
 	await page.goto('/de-DE/start');
 	await page.getByRole('button', { name: 'Spiel beitreten' }).click();

@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolve } from 'node:path';
+
+// Der Scan-Test braucht Chromiums Fake-Kamera; e2e/scan.spec.ts schreibt das Video vor dem Browserstart.
+const fakeCamera = resolve('test-results/fake-camera.y4m');
 
 // Die E2E-Tests laufen gegen den statischen Build in build/ (vorher `yarn build`), so wie GitHub Pages ihn ausliefert.
 export default defineConfig({
@@ -19,8 +23,21 @@ export default defineConfig({
 		timeout: 30_000
 	},
 	projects: [
-		{ name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-		{ name: 'webkit', use: { ...devices['Desktop Safari'] } },
-		{ name: 'mobile', use: { ...devices['Pixel 7'] } }
+		{ name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: /scan\.spec\.ts/ },
+		{ name: 'webkit', use: { ...devices['Desktop Safari'] }, testIgnore: /scan\.spec\.ts/ },
+		{ name: 'mobile', use: { ...devices['Pixel 7'] }, testIgnore: /scan\.spec\.ts/ },
+		{
+			name: 'scan',
+			testMatch: /scan\.spec\.ts/,
+			// Erst nach den anderen Projekten: der Fake-Kamera-Browser bremst parallel laufende Tests aus.
+			dependencies: ['chromium', 'webkit', 'mobile'],
+			use: {
+				...devices['Desktop Chrome'],
+				permissions: ['camera'],
+				launchOptions: {
+					args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', `--use-file-for-fake-video-capture=${fakeCamera}`]
+				}
+			}
+		}
 	]
 });
