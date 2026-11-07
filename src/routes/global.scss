@@ -1,27 +1,30 @@
-:root {
-	--background: rgb(20, 20, 20);
-	--surface: rgb(32, 32, 32);
-	--foreground: rgb(240, 240, 240);
-	--foreground-accent: rgb(200, 200, 200);
-	--border: rgb(90, 90, 90);
-	--accent: rgb(76, 175, 80);
-	--accent-soft: rgba(76, 175, 80, 0.18);
-	--warn: rgb(255, 179, 71);
-	color-scheme: dark;
+/* Skizzen-Look wie bei One Clue: Schwarz auf Weiß, handschriftliche Überschriften, unregelmäßige Ränder, harter Schatten.
+   Bewusst nur hell: Weiß ist am Tisch aus der Ferne am besten lesbar. */
+
+@font-face {
+	font-family: 'Patrick Hand';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/patrick-hand-latin.woff2') format('woff2');
 }
 
-@media (prefers-color-scheme: light) {
-	:root {
-		--background: rgb(250, 250, 250);
-		--surface: rgb(255, 255, 255);
-		--foreground: rgb(25, 25, 25);
-		--foreground-accent: rgb(70, 70, 70);
-		--border: rgb(190, 190, 190);
-		--accent: rgb(46, 125, 50);
-		--accent-soft: rgba(46, 125, 50, 0.12);
-		--warn: rgb(176, 96, 0);
-		color-scheme: light;
-	}
+:root {
+	--background: #fff;
+	--surface: #fff;
+	--foreground: #000;
+	--foreground-accent: #444;
+	--muted: #666;
+	--border: #000;
+	--accent: #000;
+	--accent-soft: #f2f2f2;
+	--warn: #000;
+	--font-hand: 'Patrick Hand', 'Chalkboard SE', 'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive, sans-serif;
+	/* Unregelmäßige Ecken, zwei Varianten, damit nicht alles gleich schief ist */
+	--sketch-a: 255px 15px 225px 15px / 15px 225px 15px 255px;
+	--sketch-b: 15px 225px 15px 255px / 255px 15px 225px 15px;
+	--sketch-row: 14px 8px 16px 6px / 6px 16px 8px 14px;
+	color-scheme: light;
 }
 
 /* Wrapper aus app.html; als Klasse statt style-Attribut, damit die CSP ohne unsafe-inline auskommt. */
@@ -41,8 +44,25 @@ body {
 		Arial,
 		sans-serif;
 	margin: 0;
-	border-color: var(--foreground);
 	line-height: 1.4;
+	-webkit-tap-highlight-color: transparent;
+	/* Kein Doppeltipp-Zoom, Pinch-Zoom bleibt erlaubt */
+	touch-action: manipulation;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-hand);
+	font-weight: 400;
+	letter-spacing: 0.02em;
+}
+
+h1 {
+	font-size: 2em;
+	text-decoration: underline wavy;
+	text-underline-offset: 0.2em;
+	text-decoration-thickness: 2px;
 }
 
 a,
@@ -56,6 +76,7 @@ a:hover {
 	color: var(--foreground-accent);
 }
 
+/* Formularelemente: schwarzer Rand mit schiefen Ecken, Schatten beim Fokus */
 button,
 input,
 select,
@@ -65,9 +86,16 @@ textarea {
 	font-size: max(16px, 1em);
 	color: var(--foreground);
 	background-color: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 6px;
-	padding: 6px 10px;
+	border: 2px solid var(--border);
+	border-radius: var(--sketch-b);
+	padding: 8px 12px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+	outline: none;
+	box-shadow: 3px 3px 0 var(--border);
 }
 
 button {
@@ -75,47 +103,93 @@ button {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
+	font-family: var(--font-hand);
+	font-size: max(16px, 1.1em);
+	border-radius: var(--sketch-a);
+	box-shadow: 2px 2px 0 var(--border);
+	transition:
+		transform 0.08s,
+		box-shadow 0.08s;
+
+	&:nth-of-type(even) {
+		border-radius: var(--sketch-b);
+	}
 
 	&:hover:not(:disabled) {
-		border-color: var(--foreground);
+		background-color: var(--accent-soft);
 	}
 
 	&:active:not(:disabled) {
-		transform: scale(0.97);
+		transform: translate(2px, 2px);
+		box-shadow: 0 0 0 var(--border);
 	}
 
 	&:disabled {
-		opacity: 0.4;
+		opacity: 0.35;
 		cursor: default;
+	}
+
+	&:focus-visible {
+		outline: 2px dashed var(--border);
+		outline-offset: 3px;
 	}
 }
 
 button.primary {
-	background-color: var(--accent);
-	border-color: var(--accent);
-	color: white;
-	font-weight: bold;
+	background-color: var(--foreground);
+	border-color: var(--foreground);
+	color: var(--background);
+
+	&:hover:not(:disabled) {
+		background-color: #222;
+	}
 }
 
 button.secondary {
-	background: none;
+	box-shadow: none;
+	border-style: dashed;
+}
+
+button.big,
+.big {
+	border-width: 3px;
+	box-shadow: 3px 3px 0 var(--border);
+	font-size: max(16px, 1.35em);
+	transform: rotate(-0.6deg);
+
+	&:nth-of-type(even) {
+		transform: rotate(0.7deg);
+	}
+
+	&:active:not(:disabled) {
+		transform: translate(2px, 2px) rotate(0deg);
+		box-shadow: 1px 1px 0 var(--border);
+	}
 }
 
 button.icon-button {
 	border: none;
 	background: none;
+	box-shadow: none;
+	border-radius: 50%;
 	padding: 6px;
 	font-size: 1.2em;
+
+	&:active:not(:disabled) {
+		transform: scale(0.9);
+	}
 }
 
 dialog {
 	background-color: var(--surface);
 	color: var(--foreground);
-	border: 1px solid var(--border);
+	border: 3px solid var(--border);
+	border-radius: var(--sketch-a);
+	box-shadow: 4px 4px 0 var(--border);
 	padding: 20px;
 
 	&::backdrop {
-		background: rgba(0, 0, 0, 0.6);
+		background: rgba(0, 0, 0, 0.55);
 	}
 }
 
@@ -135,15 +209,20 @@ dialog {
 
 .warn-text {
 	color: var(--warn);
+	font-weight: bold;
+	text-decoration: underline wavy;
+	text-underline-offset: 0.2em;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	button:active:not(:disabled) {
-		transform: none;
+	button,
+	button.big,
+	.big {
+		transition: none;
 	}
 }
 
-/* Textseiten (Impressum, About) */
+/* Textseiten (Impressum, About, Anleitung) */
 .legal {
 	max-width: 72ch;
 	margin: 0 auto;
@@ -165,8 +244,8 @@ dialog {
 	}
 
 	.note {
-		border: 1px solid var(--border);
-		border-radius: 8px;
+		border: 2px solid var(--border);
+		border-radius: var(--sketch-row);
 		padding: 12px 16px;
 		margin-top: 1em;
 	}

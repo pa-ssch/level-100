@@ -25,9 +25,10 @@
 <style lang="scss">
 	.seg {
 		display: flex;
-		border: 1px solid var(--border);
-		border-radius: 10px;
+		border: 2px solid var(--border);
+		border-radius: var(--sketch-row);
 		overflow: hidden;
+		box-shadow: 2px 2px 0 var(--border);
 
 		button {
 			flex: 1;
@@ -35,6 +36,7 @@
 			gap: 1px;
 			border: none;
 			border-radius: 0;
+			box-shadow: none;
 			padding: 10px 4px;
 			justify-content: center;
 

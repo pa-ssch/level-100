@@ -44,7 +44,7 @@
 		{#if showBack}
 			<a class="back" href={startHref} aria-label={t(language, 'back')} title={t(language, 'back')}><Icon name="arrow-left" /></a>
 		{/if}
-		<a class="brand noselect" href={startHref}>Level 100!</a>
+		<a class="brand noselect" href={startHref}>Level 100</a>
 	</nav>
 
 	<main class="content">
@@ -74,11 +74,17 @@
 
 		.header {
 			position: relative;
-			padding: 12px 16px;
-			font-size: 1.6em;
-			font-weight: bold;
+			padding: 12px 16px 6px;
+			font-family: var(--font-hand);
+			font-size: 1.9em;
 			text-align: center;
-			border-bottom: 1px solid var(--border);
+
+			.brand {
+				text-decoration: underline wavy;
+				text-underline-offset: 0.2em;
+				text-decoration-thickness: 2px;
+				letter-spacing: 0.05em;
+			}
 
 			.back {
 				position: absolute;
@@ -102,8 +108,8 @@
 			justify-content: space-between;
 			gap: 8px 16px;
 			padding: 16px;
-			font-size: 0.8em;
-			border-top: 1px solid var(--border);
+			font-size: 0.85em;
+			opacity: 0.65;
 
 			.left,
 			.right {

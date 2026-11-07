@@ -153,7 +153,9 @@
 			display: inline-flex;
 			align-items: center;
 			gap: 6px;
-			border: 1px dashed var(--border);
+			font-family: var(--font-hand);
+			font-size: 1.1em;
+			border: 2px dashed var(--border);
 			border-radius: 6px;
 			padding: 6px 10px;
 		}

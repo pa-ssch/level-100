@@ -308,27 +308,31 @@
 
 		i {
 			flex: 1;
-			height: 8px;
-			border-radius: 4px;
-			background: var(--border);
+			height: 10px;
+			border-radius: 5px;
+			background: var(--accent-soft);
+			border: 2px solid var(--border);
+			box-sizing: border-box;
 
 			&.done {
-				background: var(--accent);
+				background: var(--foreground);
 			}
 
 			&.now {
-				background: var(--foreground);
+				background: var(--surface);
 			}
 		}
 	}
 
 	.hero {
-		border: 2px solid var(--accent);
-		border-radius: 16px;
+		border: 3px solid var(--border);
+		border-radius: var(--sketch-a);
+		box-shadow: 4px 4px 0 var(--border);
 		padding: 20px 16px;
 		text-align: center;
 		background: var(--surface);
-		margin: 12px 0;
+		margin: 14px 4px;
+		transform: rotate(-0.4deg);
 
 		.lvl {
 			font-size: 0.8em;
@@ -338,9 +342,9 @@
 		}
 
 		.req {
-			font-size: 1.7em;
-			font-weight: bold;
-			line-height: 1.15;
+			font-family: var(--font-hand);
+			font-size: 2.2em;
+			line-height: 1.1;
 			margin: 8px 0;
 		}
 
@@ -364,9 +368,14 @@
 			padding: 14px 10px;
 			text-align: center;
 			font-weight: bold;
-			border: 2px solid var(--accent);
-			border-radius: 14px;
-			font-size: 1.05em;
+			border: 3px solid var(--border);
+			border-radius: var(--sketch-a);
+			font-family: var(--font-hand);
+			font-size: 1.3em;
+
+			&:nth-child(even) {
+				border-radius: var(--sketch-b);
+			}
 
 			&.done {
 				border-color: var(--border);
@@ -405,7 +414,7 @@
 			display: inline-flex;
 			justify-content: center;
 			align-items: center;
-			border: 1px solid var(--border);
+			border: 2px solid var(--border);
 			border-radius: 6px;
 			padding: 6px 10px;
 		}

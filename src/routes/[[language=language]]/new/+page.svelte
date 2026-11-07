@@ -38,11 +38,24 @@
 		display: flex;
 		align-items: center;
 		gap: 14px;
-		border: 1px solid var(--border);
+		border: 3px solid var(--border);
 		background: var(--surface);
-		border-radius: 12px;
+		border-radius: var(--sketch-a);
+		box-shadow: 3px 3px 0 var(--border);
 		padding: 16px;
 		font-size: 1.3em;
+		transform: rotate(-0.5deg);
+
+		&:nth-child(even) {
+			border-radius: var(--sketch-b);
+			transform: rotate(0.5deg);
+		}
+
+		strong {
+			font-family: var(--font-hand);
+			font-size: 1.3em;
+			font-weight: 400;
+		}
 
 		span {
 			display: flex;

@@ -32,14 +32,16 @@
 		margin: auto auto 0;
 		border-radius: 16px 16px 0 0;
 		border-bottom: none;
+		box-shadow: none;
 		padding: 12px 16px 24px;
 		box-sizing: border-box;
 		overflow: auto;
 
 		@media (min-width: 600px) {
 			margin: auto;
-			border-radius: 16px;
-			border-bottom: 1px solid var(--border);
+			border-radius: var(--sketch-a);
+			border-bottom: 3px solid var(--border);
+			box-shadow: 4px 4px 0 var(--border);
 		}
 	}
 

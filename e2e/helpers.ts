@@ -4,6 +4,8 @@ export const ROUTES = [
 	'/',
 	'/de-DE/start',
 	'/en-US/start',
+	'/de-DE/how',
+	'/en-US/how',
 	'/de-DE/new',
 	'/de-DE/random',
 	'/en-US/random',

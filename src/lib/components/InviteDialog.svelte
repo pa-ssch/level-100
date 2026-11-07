@@ -81,7 +81,7 @@
 		margin: 12px auto 0;
 		width: min(100%, 360px);
 		height: auto;
-		border-radius: 8px;
+		border-radius: var(--sketch-row);
 		background: #fff;
 	}
 

@@ -37,10 +37,12 @@
 		}
 
 		.track {
-			width: 42px;
-			height: 24px;
-			border-radius: 12px;
-			background: var(--border);
+			width: 44px;
+			height: 26px;
+			border-radius: 13px;
+			border: 2px solid var(--border);
+			box-sizing: border-box;
+			background: var(--surface);
 			position: relative;
 			transition: background 0.15s;
 			flex: none;
@@ -48,21 +50,27 @@
 
 		.knob {
 			position: absolute;
-			top: 3px;
-			left: 3px;
+			top: 2px;
+			left: 2px;
 			width: 18px;
 			height: 18px;
 			border-radius: 50%;
-			background: var(--surface);
+			background: var(--foreground);
 			transition: transform 0.15s;
 		}
 
 		input:checked + .track {
-			background: var(--accent);
+			background: var(--foreground);
 		}
 
 		input:checked + .track .knob {
 			transform: translateX(18px);
+			background: var(--surface);
+		}
+
+		.text {
+			font-family: var(--font-hand);
+			font-size: 1.15em;
 		}
 
 		input:focus-visible + .track {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { asset, resolve } from '$app/paths';
 	import Seo from '$lib/components/Seo.svelte';
 </script>
 
@@ -75,7 +75,9 @@
 	<p>
 		Der Quelltext dieser Seite ist unter der MIT-Lizenz veröffentlicht:
 		<a href="https://github.com/pa-ssch/level-100" rel="noopener">github.com/pa-ssch/level-100</a>. Die durch den Seitenbetreiber erstellten
-		Inhalte und Werke unterliegen dem deutschen Urheberrecht. Die Symbole stammen aus
+		Inhalte und Werke unterliegen dem deutschen Urheberrecht. Die Handschrift „Patrick Hand“ von Patrick Wagesreiter steht unter der SIL
+		Open Font License 1.1 (Lizenztext unter
+		<a href={asset('/fonts/OFL.txt')}>/fonts/OFL.txt</a>). Die Symbole stammen aus
 		<a href="https://fontawesome.com" rel="noopener">Font Awesome Free</a> (Lizenz CC BY 4.0).
 	</p>
 

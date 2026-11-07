@@ -92,7 +92,7 @@
 			max-width: 360px;
 			aspect-ratio: 1;
 			object-fit: cover;
-			border-radius: 12px;
+			border-radius: var(--sketch-row);
 			background: #000;
 			display: none;
 		}

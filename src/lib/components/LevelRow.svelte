@@ -108,15 +108,15 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		border: 1px solid var(--border);
+		border: 2px solid var(--border);
 		background: var(--surface);
-		border-radius: 10px;
+		border-radius: var(--sketch-row);
 		padding: 8px 6px 8px 10px;
 		margin: 6px 0;
 
 		&.dragging {
 			border-color: var(--accent);
-			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+			box-shadow: 4px 4px 0 var(--border);
 		}
 
 		.grip {
@@ -161,8 +161,10 @@
 
 	.chip {
 		border-radius: 999px;
+		box-shadow: none;
 		padding: 4px 10px;
-		font-size: 0.9em;
+		font-family: inherit;
+		font-size: max(16px, 0.9em);
 		font-weight: bold;
 
 		&.add {

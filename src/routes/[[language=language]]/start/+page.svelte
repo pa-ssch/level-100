@@ -109,6 +109,7 @@
 		<a class="big primary" href={href('/[[language=language]]/new', language)}><Icon name="plus" /> {t(language, 'newGame')}</a>
 		<button type="button" class="big" onclick={() => (joinOpen = true)}><Icon name="link" /> {t(language, 'joinGame')}</button>
 		<p class="hint">{t(language, 'joinHint')}</p>
+		<p><a class="how" href={href('/[[language=language]]/how', language)}>{t(language, 'howLink')}</a></p>
 	</section>
 {:else if loaded}
 	<a class="big primary" href={href('/[[language=language]]/new', language)}><Icon name="plus" /> {t(language, 'newGame')}</a>
@@ -125,6 +126,7 @@
 
 	<p class="join">
 		<button type="button" class="secondary" onclick={() => (joinOpen = true)}><Icon name="link" /> {t(language, 'joinGame')}</button>
+		<a class="how" href={href('/[[language=language]]/how', language)}>{t(language, 'howLink')}</a>
 	</p>
 {/if}
 
@@ -163,36 +165,45 @@
 		align-items: center;
 		justify-content: center;
 		gap: 8px;
-		border: 1px solid var(--border);
-		border-radius: 12px;
+		border: 3px solid var(--border);
+		border-radius: var(--sketch-a);
 		padding: 16px;
-		font-weight: bold;
-		font-size: 1.1em;
-		margin: 12px 0;
+		font-family: var(--font-hand);
+		font-size: 1.5em;
+		margin: 14px 0;
 		background: var(--surface);
+		box-shadow: 3px 3px 0 var(--border);
+		transform: rotate(-0.6deg);
+
+		&:nth-of-type(even),
+		&.primary {
+			border-radius: var(--sketch-b);
+			transform: rotate(0.5deg);
+		}
+
+		&:active {
+			transform: translate(2px, 2px);
+			box-shadow: 1px 1px 0 var(--border);
+		}
 
 		&.primary {
-			background: var(--accent);
-			border-color: var(--accent);
-			color: #fff;
+			background: var(--foreground);
+			color: var(--background);
 		}
 	}
 
 	.section {
-		font-size: 0.8em;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		opacity: 0.7;
-		margin: 20px 0 6px;
+		font-size: 1.25em;
+		margin: 22px 0 6px;
 	}
 
 	.tile {
 		display: flex;
 		align-items: center;
 		gap: 4px;
-		border: 1px solid var(--border);
+		border: 2px solid var(--border);
 		background: var(--surface);
-		border-radius: 12px;
+		border-radius: var(--sketch-row);
 		padding: 2px 4px 2px 0;
 		margin: 8px 0;
 
@@ -220,9 +231,10 @@
 		}
 
 		.badge {
-			font-size: 0.75em;
-			background: var(--accent);
-			color: #fff;
+			font-family: var(--font-hand);
+			font-size: 0.9em;
+			background: var(--foreground);
+			color: var(--background);
 			border-radius: 999px;
 			padding: 2px 8px;
 			white-space: nowrap;
@@ -236,5 +248,17 @@
 	.join {
 		margin: 24px 0;
 		text-align: center;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px 20px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.how {
+		font-family: var(--font-hand);
+		font-size: 1.15em;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
 	}
 </style>

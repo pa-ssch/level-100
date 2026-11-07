@@ -18,6 +18,7 @@ Level 100 is an independent project with no affiliation to "Phase 10", "Stufe 10
 
 - https://lvl100.de/ – language redirect
 - https://lvl100.de/de-DE/start and https://lvl100.de/en-US/start – ruleset list (history, favorites, examples)
+- https://lvl100.de/de-DE/how and https://lvl100.de/en-US/how – how it works, in five steps
 - https://lvl100.de/de-DE/new and https://lvl100.de/en-US/new – new game: random or custom
 - https://lvl100.de/de-DE/random and https://lvl100.de/en-US/random – random levels by deck, duration and difficulty
 - https://lvl100.de/de-DE/prepare and https://lvl100.de/en-US/prepare – level editor with building blocks

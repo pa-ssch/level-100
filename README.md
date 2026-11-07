@@ -37,8 +37,11 @@ yarn preview    # Build lokal ansehen
 
 Local Storage: `level100.rulesets` (Verlauf/Favoriten), `level100.games` (Spielstände, ein Spieler je Gerät), `level100.decks` (eigene Decks), `level100.language`.
 
+Gestaltung: Skizzen-Look wie [One Clue](https://github.com/pa-ssch/one-clue), schwarz auf weiß, nur hell; die Design-Tokens stehen in
+`src/routes/global.scss`.
+
 Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Die Content-Security-Policy steht als Meta-Tag in jeder
-Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0). Spielzustand und geteilte Regelsätze leben
+Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0), die Handschrift „Patrick Hand“ (SIL OFL 1.1) wird selbst gehostet. Spielzustand und geteilte Regelsätze leben
 ausschließlich in der URL und im `localStorage` des Browsers.
 
 ## Deployment

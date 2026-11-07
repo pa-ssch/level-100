@@ -6,6 +6,8 @@ const pages = [
 	{ path: '/', alternates: false },
 	{ path: '/de-DE/start', alternates: true },
 	{ path: '/en-US/start', alternates: true },
+	{ path: '/de-DE/how', alternates: true },
+	{ path: '/en-US/how', alternates: true },
 	{ path: '/de-DE/new', alternates: true },
 	{ path: '/en-US/new', alternates: true },
 	{ path: '/de-DE/random', alternates: true },

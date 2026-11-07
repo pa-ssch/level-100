@@ -8,6 +8,7 @@ type Route =
 	| '/[[language=language]]/play'
 	| '/[[language=language]]/prepare'
 	| '/[[language=language]]/deck'
+	| '/[[language=language]]/how'
 	| '/[[language=language]]/random'
 	| '/[[language=language]]/new'
 	| '/[[language=language]]/start';

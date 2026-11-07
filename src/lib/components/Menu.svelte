@@ -66,9 +66,9 @@
 		z-index: 5;
 		min-width: 160px;
 		background: var(--surface);
-		border: 1px solid var(--border);
-		border-radius: 10px;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+		border: 2px solid var(--border);
+		border-radius: var(--sketch-row);
+		box-shadow: 4px 4px 0 var(--border);
 		padding: 4px 0;
 		display: flex;
 		flex-direction: column;
@@ -76,7 +76,10 @@
 		button {
 			border: none;
 			border-radius: 0;
+			box-shadow: none;
 			background: none;
+			font-family: inherit;
+			font-size: max(16px, 1em);
 			text-align: left;
 			padding: 10px 16px;
 			width: 100%;
