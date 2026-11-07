@@ -59,7 +59,7 @@ test('Zufallsspiel in drei Taps, Runden mit Punkten, Fortsetzen aus dem Verlauf'
 	await expect(page.getByRole('heading', { name: 'Läuft gerade' })).toBeVisible();
 	const tile = page.getByRole('article').first();
 	await expect(tile).toContainText('Mittel · 8 Level');
-	await expect(tile).toContainText('Level 2 von 8');
+	await expect(tile).toContainText('Level 2 von 8 · zuletzt heute');
 	await tile.getByRole('link').click();
 	await expect(page.getByText('Level 2 von 8 · 17 Punkte')).toBeVisible();
 
@@ -165,8 +165,14 @@ test('Editor: Level aus Bausteinen, Drag & Drop, sortieren, Verlauf-Menü mit Du
 	const copy = page.getByRole('article').filter({ hasText: 'House rules (copy)!' });
 	await expect(copy).toBeVisible();
 	await copy.getByRole('button', { name: 'Menu: House rules (copy)!' }).click();
-	page.once('dialog', (d) => d.accept());
 	await page.getByRole('menuitem', { name: 'Delete' }).click();
+	// Rückfrage als eigenes Blatt, kein Browser-Dialog
+	await expect(page.getByRole('heading', { name: 'Delete' })).toBeVisible();
+	await page.getByRole('button', { name: 'Keep' }).click();
+	await expect(copy).toBeVisible();
+	await copy.getByRole('button', { name: 'Menu: House rules (copy)!' }).click();
+	await page.getByRole('menuitem', { name: 'Delete' }).click();
+	await page.getByRole('button', { name: 'Delete', exact: true }).click();
 	await expect(page.getByRole('article').filter({ hasText: 'House rules (copy)!' })).toHaveCount(0);
 	expect(errors).toEqual([]);
 });
@@ -201,12 +207,12 @@ test('Eigenes Deck anlegen, verwenden und wieder löschen', async ({ page, brows
 	await expect(page.getByLabel('Name')).toHaveValue('Skatrunde');
 	const skat = page.getByRole('radio', { name: /Skatblatt/ });
 	await expect(skat).toHaveAttribute('aria-checked', 'true');
-	// Löschen fragt nach; abgebrochen bleibt es da
-	page.once('dialog', (d) => d.dismiss());
+	// Löschen fragt nach; „Behalten“ lässt es da
 	await page.getByRole('button', { name: 'Deck löschen: Skatblatt' }).click();
+	await page.getByRole('button', { name: 'Behalten' }).click();
 	await expect(skat).toBeVisible();
-	page.once('dialog', (d) => d.accept());
 	await page.getByRole('button', { name: 'Deck löschen: Skatblatt' }).click();
+	await page.getByRole('button', { name: 'Deck löschen', exact: true }).click();
 	await expect(page.getByRole('radio', { name: /Skatblatt/ })).toHaveCount(0);
 	expect(errors).toEqual([]);
 });
@@ -277,4 +283,45 @@ test('funktioniert auch ohne crypto.randomUUID (unsicherer Kontext, z. B. LAN-Ad
 	await createCustomGame(page, 'LAN-Test');
 	await expect(page.getByText('Dein Level')).toBeVisible();
 	expect(errors).toEqual([]);
+});
+
+test('laufendes Spiel abbrechen: im Spiel und aus dem Verlauf, jeweils mit Rückfrage', async ({ page, browserName }) => {
+	const errors = watchErrors(page, browserName);
+	await createCustomGame(page, 'Abbruchtest');
+	await page.getByRole('button', { name: 'Spiel abbrechen' }).click();
+	await page.getByRole('button', { name: 'Behalten' }).click();
+	await expect(page.getByText('Dein Level')).toBeVisible();
+	await page.getByRole('button', { name: 'Spiel abbrechen' }).click();
+	await page.getByRole('button', { name: 'Spiel abbrechen', exact: true }).last().click();
+	await expect(page).toHaveURL(/\/de-DE\/start$/);
+	await expect(page.getByRole('heading', { name: 'Läuft gerade' })).toHaveCount(0);
+	const tile = page.getByRole('article').filter({ hasText: 'Abbruchtest' });
+	await expect(tile).toContainText('1× gespielt · zuletzt heute');
+
+	// Wieder starten, dann aus dem Verlauf abbrechen
+	await tile.getByRole('link').click();
+	await expect(page.getByText('Dein Level')).toBeVisible();
+	await page.getByRole('link', { name: 'Zurück' }).click();
+	await expect(page.getByRole('heading', { name: 'Läuft gerade' })).toBeVisible();
+	await tile.getByRole('button', { name: 'Menü: Abbruchtest' }).click();
+	await page.getByRole('menuitem', { name: 'Spiel abbrechen' }).click();
+	await page.getByRole('button', { name: 'Spiel abbrechen', exact: true }).click();
+	await expect(page.getByRole('heading', { name: 'Läuft gerade' })).toHaveCount(0);
+	// Löschen entfernt das Spiel ganz
+	await tile.getByRole('button', { name: 'Menü: Abbruchtest' }).click();
+	await page.getByRole('menuitem', { name: 'Löschen' }).click();
+	await page.getByRole('button', { name: 'Löschen', exact: true }).click();
+	await expect(page.getByRole('article').filter({ hasText: 'Abbruchtest' })).toHaveCount(0);
+	expect(errors).toEqual([]);
+});
+
+test('Hinweise erklären Deck, Reihenfolge und Punkte', async ({ page }) => {
+	await page.goto('/de-DE/random');
+	await expect(page.getByText('Mit welchen echten Karten ihr spielt')).toBeVisible();
+	await expect(page.getByText('Alle beginnen bei Level 1')).toBeVisible();
+	await page.getByRole('switch', { name: 'Level der Reihe nach' }).click();
+	await expect(page.getByText('Jede Runde darf ein beliebiges')).toBeVisible();
+	await expect(page.getByText('Restkarten auf seiner Hand')).toBeVisible();
+	await page.getByRole('switch', { name: 'Punkte zählen' }).click();
+	await expect(page.getByText('Es zählt nur, wer zuerst')).toBeVisible();
 });

@@ -5,10 +5,12 @@
 	import { levelCards } from '$lib/game/requirements';
 	import type { Ruleset } from '$lib/game/ruleset';
 	import { decodeRuleset } from '$lib/game/share';
-	import { loadGame, saveGame, saveRuleset } from '$lib/game/storage';
+	import { loadGame, removeGame, saveGame, saveRuleset } from '$lib/game/storage';
 	import { href } from '$lib/links';
 	import { describeLevel, displayName, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
+	import { goto } from '$app/navigation';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import InviteDialog from '$lib/components/InviteDialog.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import Sheet from '$lib/components/Sheet.svelte';
@@ -25,6 +27,7 @@
 	let error = $state<string | null>(null);
 	let showAll = $state(false);
 	let inviteOpen = $state(false);
+	let cancelOpen = $state(false);
 	/** Punkteblatt: welches Level geschafft (null = keins) und Punkte. */
 	let entry = $state<{ completed: number | null; points: number } | null>(null);
 
@@ -221,12 +224,17 @@
 		</div>
 	{/if}
 
-	{#if !free}
-		<p class="center">
+	<p class="center secondary-actions">
+		{#if !free}
 			<button type="button" class="secondary" onclick={() => (showAll = !showAll)} aria-expanded={showAll}
 				>{showAll ? t(language, 'hideAll') : t(language, 'showAll')}</button
 			>
-		</p>
+		{/if}
+		{#if !finished}
+			<button type="button" class="secondary" onclick={() => (cancelOpen = true)}>{t(language, 'cancelGame')}</button>
+		{/if}
+	</p>
+	{#if !free}
 		{#if showAll}
 			<ol class="levels">
 				{#each ruleset.levels as level, i (i)}
@@ -274,6 +282,21 @@
 {#if error}
 	<p class="warn-text" role="alert">{t(language, 'unexpectedError')}: {error}</p>
 {/if}
+{#if cancelOpen && view.status === 'playing'}
+	{@const current = view.game}
+	<ConfirmDialog
+		title={t(language, 'cancelGame')}
+		message={t(language, 'cancelGameConfirm', { name: displayName(language, current.ruleset.name, current.ruleset.levels.length) })}
+		confirmLabel={t(language, 'cancelGame')}
+		cancelLabel={t(language, 'keep')}
+		{language}
+		onconfirm={() => {
+			removeGame(current.ruleset.id);
+			goto(href('/[[language=language]]/start', language));
+		}}
+		onclose={() => (cancelOpen = false)}
+	/>
+{/if}
 {#if inviteOpen && inviteUrl}
 	<InviteDialog url={inviteUrl} {language} onclose={() => (inviteOpen = false)} />
 {/if}
@@ -299,6 +322,13 @@
 
 	.center {
 		text-align: center;
+	}
+
+	.secondary-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		justify-content: center;
 	}
 
 	.progress {

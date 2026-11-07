@@ -6,6 +6,7 @@
 	import { loadDecks, removeDeck } from '$lib/game/storage';
 	import { t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
+	import ConfirmDialog from './ConfirmDialog.svelte';
 
 	let {
 		deck,
@@ -17,6 +18,7 @@
 
 	let saved = $state<SavedDeck[]>([]);
 	let expanded = $state(false);
+	let toDelete = $state<SavedDeck | null>(null);
 	let selected = $derived(presetOf(deck) ?? saved.find((d) => JSON.stringify(d.deck) === JSON.stringify(deck))?.id ?? 'custom');
 
 	$effect(() => {
@@ -30,8 +32,7 @@
 	});
 
 	function remove(d: SavedDeck) {
-		if (!confirm(t(language, 'deckDeleteConfirm', { name: d.name || t(language, 'deckCustom') }))) return;
-		saved = removeDeck(d.id);
+		toDelete = d;
 	}
 </script>
 
@@ -92,6 +93,7 @@
 		{/each}
 	{/if}
 </div>
+<p class="hint">{t(language, 'deckHint')}</p>
 <div class="tools">
 	{#if saved.length > 0}
 		<button type="button" class="secondary" onclick={() => (expanded = !expanded)} aria-expanded={expanded}>
@@ -101,6 +103,19 @@
 	{/if}
 	<a class="new" href={newDeckHref}><Icon name="plus" /> {t(language, 'newDeck')}</a>
 </div>
+
+{#if toDelete}
+	{@const d = toDelete}
+	<ConfirmDialog
+		title={t(language, 'deckDelete')}
+		message={t(language, 'deckDeleteConfirm', { name: d.name || t(language, 'deckCustom') })}
+		confirmLabel={t(language, 'deckDelete')}
+		cancelLabel={t(language, 'keep')}
+		{language}
+		onconfirm={() => (saved = removeDeck(d.id))}
+		onclose={() => (toDelete = null)}
+	/>
+{/if}
 
 <style lang="scss">
 	.decks {
@@ -140,6 +155,12 @@
 			flex: 1;
 			min-width: 0;
 		}
+	}
+
+	.hint {
+		margin: 8px 0 0;
+		font-size: 0.9em;
+		opacity: 0.75;
 	}
 
 	.tools {

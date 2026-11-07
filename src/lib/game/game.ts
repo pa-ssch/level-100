@@ -18,6 +18,8 @@ export interface Game {
 	points: number;
 	rounds: Round[];
 	startedAt: string;
+	/** Letzte Änderung (Runde eingetragen), für „zuletzt gespielt“. */
+	updatedAt: string;
 	finishedAt: string | null;
 }
 
@@ -32,6 +34,7 @@ export function createGame(ruleset: Ruleset): Game {
 		points: 0,
 		rounds: [],
 		startedAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString(),
 		finishedAt: null
 	};
 }
@@ -66,6 +69,7 @@ export function applyRound(game: Game, round: Round): Game {
 		done,
 		points,
 		rounds: [...game.rounds, round],
+		updatedAt: new Date().toISOString(),
 		finishedAt: finished ? (game.finishedAt ?? new Date().toISOString()) : null
 	};
 }

@@ -123,8 +123,9 @@ function validateGame(input: unknown): Game | null {
 		rounds.push({ completed, points: res.points });
 	}
 	const startedAt = typeof g.startedAt === 'string' ? g.startedAt : new Date(0).toISOString();
+	const updatedAt = typeof g.updatedAt === 'string' && !Number.isNaN(Date.parse(g.updatedAt)) ? g.updatedAt : startedAt;
 	const finishedAt = typeof g.finishedAt === 'string' ? g.finishedAt : null;
-	return { v: 2, id: g.id, ruleset, done: g.done as boolean[], points: g.points, rounds, startedAt, finishedAt };
+	return { v: 2, id: g.id, ruleset, done: g.done as boolean[], points: g.points, rounds, startedAt, updatedAt, finishedAt };
 }
 
 /** Alle gespeicherten Spiele (höchstens eines je Regelsatz), neueste zuerst. */

@@ -180,6 +180,18 @@ const strings = {
 		qrAlt: 'QR-Code mit dem Link zum Spiel',
 		// Meta
 		levels: 'Level',
+		cancelGame: 'Spiel abbrechen',
+		cancelGameConfirm: 'Laufendes Spiel „{name}“ abbrechen? Dein Stand geht verloren, das Spiel bleibt im Verlauf.',
+		keep: 'Behalten',
+		lastPlayed: 'zuletzt {d}',
+		today: 'heute',
+		yesterday: 'gestern',
+		daysAgo: 'vor {n} Tagen',
+		deckHint: 'Mit welchen echten Karten ihr spielt. Standard sind zwei Sätze 1–12 in vier Farben plus Joker.',
+		orderHintFixed: 'Alle beginnen bei Level 1 und müssen jedes Level der Reihe nach schaffen.',
+		orderHintFree: 'Jede Runde darf ein beliebiges noch offenes Level gelegt werden.',
+		pointsHintOn: 'Nach jeder Runde zählt jeder die Restkarten auf seiner Hand als Punkte. Weniger ist besser.',
+		pointsHintOff: 'Es zählt nur, wer zuerst alle Level schafft.',
 		howLink: 'Wie geht das?',
 		howTitle: 'So geht’s',
 		how1: 'Ihr spielt ein Kartenspiel mit Stufen, mit echten Karten. Die App zählt nur mit: jeder Spieler auf dem eigenen Handy.',
@@ -363,6 +375,18 @@ const strings = {
 		copied: 'Copied!',
 		qrAlt: 'QR code with the link to the game',
 		levels: 'Levels',
+		cancelGame: 'Cancel game',
+		cancelGameConfirm: 'Cancel the running game “{name}”? Your progress is lost, the game stays in your history.',
+		keep: 'Keep',
+		lastPlayed: 'last played {d}',
+		today: 'today',
+		yesterday: 'yesterday',
+		daysAgo: '{n} days ago',
+		deckHint: 'Which real cards you play with. The default is two sets of 1–12 in four suits plus jokers.',
+		orderHintFixed: 'Everyone starts at level 1 and has to complete the levels in order.',
+		orderHintFree: 'Each round you may lay down any level that is still open.',
+		pointsHintOn: 'After each round, everyone counts the cards left in hand as points. Fewer is better.',
+		pointsHintOff: 'Only who completes all levels first counts.',
 		howLink: 'How does it work?',
 		howTitle: 'How it works',
 		how1: 'You play a level-based card game with real cards. The app only keeps score: every player on their own phone.',
@@ -480,4 +504,20 @@ export function describeLevel(language: string | undefined, requirements: Requir
 /** Anzeigename eines Spiels; ohne Namen ein Fallback aus Levelzahl. */
 export function displayName(language: string | undefined, name: string, levelCount: number): string {
 	return name.trim() || t(language, 'customName', { n: levelCount });
+}
+
+/** „heute“, „gestern“, „vor n Tagen“ oder ein Datum. */
+export function relativeDay(language: string | undefined, iso: string, now = new Date()): string {
+	const date = new Date(iso);
+	if (Number.isNaN(date.getTime())) return '';
+	const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+	const days = Math.round((startOf(now) - startOf(date)) / 86_400_000);
+	if (days <= 0) return t(language, 'today');
+	if (days === 1) return t(language, 'yesterday');
+	if (days < 14) return t(language, 'daysAgo', { n: days });
+	return date.toLocaleDateString(isLanguage(language) ? language : defaultLanguage, {
+		day: 'numeric',
+		month: 'short',
+		year: now.getFullYear() === date.getFullYear() ? undefined : 'numeric'
+	});
 }

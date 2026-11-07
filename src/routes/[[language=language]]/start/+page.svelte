@@ -3,10 +3,11 @@
 	import { page } from '$app/state';
 	import { currentLevel, isFinished, type Game } from '$lib/game/game';
 	import type { Ruleset } from '$lib/game/ruleset';
-	import { loadGames, loadRulesets, removeRuleset, toggleFavorite, type StoredRuleset } from '$lib/game/storage';
+	import { loadGames, loadRulesets, removeGame, removeRuleset, toggleFavorite, type StoredRuleset } from '$lib/game/storage';
 	import { href, rulesetLinks, type RulesetLinks } from '$lib/links';
-	import { displayName, t } from '$lib/i18n';
+	import { displayName, relativeDay, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import JoinDialog from '$lib/components/JoinDialog.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import Seo from '$lib/components/Seo.svelte';
@@ -20,6 +21,7 @@
 	let loaded = $state(false);
 	let shareUrl = $state<string | null>(null);
 	let joinOpen = $state(false);
+	let confirmation = $state<{ title: string; message: string; confirmLabel: string; onconfirm: () => void } | null>(null);
 
 	async function reload() {
 		const list = loadRulesets();
@@ -44,9 +46,12 @@
 
 	function status(stored: StoredRuleset): string {
 		const game = gameOf(stored.ruleset);
-		if (game && !isFinished(game))
-			return t(language, 'runningStatus', { n: (currentLevel(game) ?? 0) + 1, total: game.ruleset.levels.length });
-		return stored.plays > 0 ? t(language, 'playsCount', { n: stored.plays }) : t(language, 'notPlayed');
+		if (game && !isFinished(game)) {
+			return `${t(language, 'runningStatus', { n: (currentLevel(game) ?? 0) + 1, total: game.ruleset.levels.length })} · ${t(language, 'lastPlayed', { d: relativeDay(language, game.updatedAt) })}`;
+		}
+		return stored.plays > 0
+			? `${t(language, 'playsCount', { n: stored.plays })} · ${t(language, 'lastPlayed', { d: relativeDay(language, stored.usedAt) })}`
+			: t(language, 'notPlayed');
 	}
 
 	function name(ruleset: Ruleset): string {
@@ -54,18 +59,38 @@
 	}
 
 	function remove(ruleset: Ruleset) {
-		if (confirm(t(language, 'deleteConfirm', { name: name(ruleset) }))) {
-			removeRuleset(ruleset.id);
-			reload();
-		}
+		confirmation = {
+			title: t(language, 'delete'),
+			message: t(language, 'deleteConfirm', { name: name(ruleset) }),
+			confirmLabel: t(language, 'delete'),
+			onconfirm: () => {
+				removeRuleset(ruleset.id);
+				reload();
+			}
+		};
+	}
+
+	function cancelGame(ruleset: Ruleset) {
+		confirmation = {
+			title: t(language, 'cancelGame'),
+			message: t(language, 'cancelGameConfirm', { name: name(ruleset) }),
+			confirmLabel: t(language, 'cancelGame'),
+			onconfirm: () => {
+				removeGame(ruleset.id);
+				reload();
+			}
+		};
 	}
 
 	function menuFor(stored: StoredRuleset) {
 		const l = links[stored.ruleset.id];
+		const game = gameOf(stored.ruleset);
+		const live = game !== undefined && !isFinished(game);
 		return [
 			{ label: t(language, 'edit'), onselect: () => goto(href('/[[language=language]]/prepare', language, { id: stored.ruleset.id })) },
 			{ label: t(language, 'share'), onselect: () => (shareUrl = l.share) },
 			{ label: t(language, 'duplicate'), onselect: () => goto(l.duplicate) },
+			...(live ? [{ label: t(language, 'cancelGame'), onselect: () => cancelGame(stored.ruleset), danger: true }] : []),
 			{ label: t(language, 'delete'), onselect: () => remove(stored.ruleset), danger: true }
 		];
 	}
@@ -84,7 +109,6 @@
 				>{live ? status(stored) : `${t(language, 'levelCount', { n: stored.ruleset.levels.length })} · ${status(stored)}`}</span
 			>
 		</a>
-		{#if live}<span class="badge">{t(language, 'running')}</span>{/if}
 		<button
 			type="button"
 			class="icon-button star"
@@ -135,6 +159,17 @@
 {/if}
 {#if joinOpen}
 	<JoinDialog {language} onclose={() => (joinOpen = false)} />
+{/if}
+{#if confirmation}
+	<ConfirmDialog
+		title={confirmation.title}
+		message={confirmation.message}
+		confirmLabel={confirmation.confirmLabel}
+		cancelLabel={t(language, 'keep')}
+		{language}
+		onconfirm={confirmation.onconfirm}
+		onclose={() => (confirmation = null)}
+	/>
 {/if}
 
 <style lang="scss">
@@ -228,16 +263,6 @@
 				font-size: 0.85em;
 				opacity: 0.75;
 			}
-		}
-
-		.badge {
-			font-family: var(--font-hand);
-			font-size: 0.9em;
-			background: var(--foreground);
-			color: var(--background);
-			border-radius: 999px;
-			padding: 2px 8px;
-			white-space: nowrap;
 		}
 
 		.star {

@@ -224,6 +224,7 @@
 				offLabel={t(language, 'orderToggle')}
 				onchange={(v) => (ruleset.mode = v ? 'free' : 'fixed')}
 			/>
+			<p class="toggle-hint">{ruleset.mode === 'free' ? t(language, 'orderHintFree') : t(language, 'orderHintFixed')}</p>
 			<Switch
 				id="points"
 				checked={ruleset.points}
@@ -231,6 +232,7 @@
 				offLabel={t(language, 'pointsToggleOff')}
 				onchange={(v) => (ruleset.points = v)}
 			/>
+			<p class="toggle-hint">{ruleset.points ? t(language, 'pointsHintOn') : t(language, 'pointsHintOff')}</p>
 		</div>
 
 		<div class="actions">
@@ -274,6 +276,12 @@
 			justify-content: center;
 			border-style: dashed;
 		}
+	}
+
+	.toggle-hint {
+		margin: -6px 0 8px 54px;
+		font-size: 0.9em;
+		opacity: 0.75;
 	}
 
 	.toggles {

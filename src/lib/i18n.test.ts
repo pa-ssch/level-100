@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { describeLevel, describeRequirement, detectLanguage, footerLabel, htmlLang, isLanguage, otherLanguage, t } from './i18n';
+import {
+	describeLevel,
+	describeRequirement,
+	detectLanguage,
+	footerLabel,
+	htmlLang,
+	isLanguage,
+	otherLanguage,
+	relativeDay,
+	t
+} from './i18n';
 
 describe('i18n', () => {
 	it('erkennt nur die unterstützten Sprachen', () => {
@@ -54,5 +64,14 @@ describe('i18n', () => {
 				{ kind: 'run', length: 4, count: 1, sameSuit: false }
 			])
 		).toBe('Drilling + Vierer-Folge');
+	});
+
+	it('beschreibt Zeitpunkte relativ', () => {
+		const now = new Date(2026, 10, 7, 15, 0);
+		expect(relativeDay('de-DE', new Date(2026, 10, 7, 9).toISOString(), now)).toBe('heute');
+		expect(relativeDay('de-DE', new Date(2026, 10, 6, 23).toISOString(), now)).toBe('gestern');
+		expect(relativeDay('en-US', new Date(2026, 10, 2).toISOString(), now)).toBe('5 days ago');
+		expect(relativeDay('de-DE', new Date(2026, 9, 1).toISOString(), now)).toMatch(/Okt/);
+		expect(relativeDay('de-DE', 'kaputt', now)).toBe('');
 	});
 });
