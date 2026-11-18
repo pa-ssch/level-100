@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
-	import { currentLevel, isFinished, type Game } from '$lib/game/game';
-	import type { Ruleset } from '$lib/game/ruleset';
-	import { loadGames, loadRulesets, removeGame, removeRuleset, toggleFavorite, type StoredRuleset } from '$lib/game/storage';
-	import { href, rulesetLinks, type RulesetLinks } from '$lib/links';
-	import { displayName, relativeDay, t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-	import JoinDialog from '$lib/components/JoinDialog.svelte';
-	import Menu from '$lib/components/Menu.svelte';
-	import Seo from '$lib/components/Seo.svelte';
-	import InviteDialog from '$lib/components/InviteDialog.svelte';
+	import { currentLevel, isFinished, type Game } from '#lib/game/game.ts';
+	import type { Ruleset } from '#lib/game/ruleset.ts';
+	import { loadGames, loadRulesets, removeGame, removeRuleset, toggleFavorite, type StoredRuleset } from '#lib/game/storage.ts';
+	import { href, rulesetLinks, type RulesetLinks } from '#lib/links.ts';
+	import { displayName, relativeDay, t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
+	import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
+	import JoinDialog from '#lib/components/JoinDialog.svelte';
+	import Menu from '#lib/components/Menu.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import InviteDialog from '#lib/components/InviteDialog.svelte';
 	import { goto } from '$app/navigation';
 
 	let language = $derived(page.params.language);

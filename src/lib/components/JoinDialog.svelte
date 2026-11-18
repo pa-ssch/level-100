@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { href } from '$lib/links';
-	import { payloadFromScan } from '$lib/qr';
-	import { t } from '$lib/i18n';
+	import { href } from '#lib/links.ts';
+	import { payloadFromScan } from '#lib/qr.ts';
+	import { t } from '#lib/i18n.ts';
 	import QrScanner from './QrScanner.svelte';
 	import Sheet from './Sheet.svelte';
 

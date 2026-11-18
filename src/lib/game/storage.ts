@@ -1,5 +1,5 @@
-import { browser } from '$app/environment';
-import { isLanguage, type Language } from '$lib/i18n';
+import { browser } from '$app/env';
+import { isLanguage, type Language } from '#lib/i18n.ts';
 import { validateSavedDeck, type SavedDeck } from './decks';
 import type { Game } from './game';
 import { validateRuleset, type Ruleset } from './ruleset';

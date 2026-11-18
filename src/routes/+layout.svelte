@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import type { ResolvedPathname } from '$app/types';
-	import { fixedRouteLanguages, htmlLang, isLanguage, otherLanguage, t } from '$lib/i18n';
-	import { saveLanguage } from '$lib/game/storage';
-	import Icon from '$lib/Icon.svelte';
+	import { fixedRouteLanguages, htmlLang, isLanguage, otherLanguage, t } from '#lib/i18n.ts';
+	import { saveLanguage } from '#lib/game/storage.ts';
+	import Icon from '#lib/Icon.svelte';
 	import './global.scss';
 
 	let { children } = $props();
@@ -53,8 +53,8 @@
 
 	<footer class="footer">
 		<div class="left">
-			<a href={resolve('/about')}>{t(language, 'about')}</a>
-			<a href={resolve('/imprint')}>{t(language, 'imprint')}</a>
+			<a href={resolve('about')}>{t(language, 'about')}</a>
+			<a href={resolve('imprint')}>{t(language, 'imprint')}</a>
 		</div>
 		<div class="right">
 			{#if languageSwitch}

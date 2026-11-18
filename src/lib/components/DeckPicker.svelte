@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { ResolvedPathname } from '$app/types';
-	import { DECK_PRESETS, type CardDeck } from '$lib/game/deck';
-	import { presetOf, type SavedDeck } from '$lib/game/decks';
-	import { loadDecks, removeDeck } from '$lib/game/storage';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
+	import { DECK_PRESETS, type CardDeck } from '#lib/game/deck.ts';
+	import { presetOf, type SavedDeck } from '#lib/game/decks.ts';
+	import { loadDecks, removeDeck } from '#lib/game/storage.ts';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
 	import ConfirmDialog from './ConfirmDialog.svelte';
 
 	let {

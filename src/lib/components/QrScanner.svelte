@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createDecoder } from '$lib/qr';
-	import { t } from '$lib/i18n';
+	import { createDecoder } from '#lib/qr.ts';
+	import { t } from '#lib/i18n.ts';
 
 	let { language, onscan }: { language: string | undefined; onscan: (text: string) => void } = $props();
 

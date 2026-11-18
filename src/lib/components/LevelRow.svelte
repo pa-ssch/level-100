@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { levelProblem } from '$lib/game/blocks';
-	import { estimateDifficulty } from '$lib/game/difficulty';
-	import type { CardDeck } from '$lib/game/deck';
-	import type { Level } from '$lib/game/ruleset';
-	import { describeLevel, t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
+	import { levelProblem } from '#lib/game/blocks.ts';
+	import { estimateDifficulty } from '#lib/game/difficulty.ts';
+	import type { CardDeck } from '#lib/game/deck.ts';
+	import type { Level } from '#lib/game/ruleset.ts';
+	import { describeLevel, t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
 	import DifficultyDots from './DifficultyDots.svelte';
 	import Menu, { type MenuItem } from './Menu.svelte';
 

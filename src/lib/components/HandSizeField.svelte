@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { deckSize, type CardDeck } from '$lib/game/deck';
-	import { clampHandSize } from '$lib/game/decks';
-	import { RULESET_LIMITS } from '$lib/game/ruleset';
-	import { t } from '$lib/i18n';
+	import { deckSize, type CardDeck } from '#lib/game/deck.ts';
+	import { clampHandSize } from '#lib/game/decks.ts';
+	import { RULESET_LIMITS } from '#lib/game/ruleset.ts';
+	import { t } from '#lib/i18n.ts';
 
 	let { value, deck, language, onchange }: { value: number; deck: CardDeck; language: string | undefined; onchange: (n: number) => void } =
 		$props();

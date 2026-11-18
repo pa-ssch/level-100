@@ -1,7 +1,7 @@
 <script lang="ts">
 	import QRCode from 'qrcode';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
 	import Sheet from './Sheet.svelte';
 
 	let { url, language, onclose }: { url: string; language: string | undefined; onclose: () => void } = $props();

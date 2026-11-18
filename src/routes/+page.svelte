@@ -2,9 +2,9 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { detectLanguage } from '$lib/i18n';
-	import { loadLanguage } from '$lib/game/storage';
-	import Seo from '$lib/components/Seo.svelte';
+	import { detectLanguage } from '#lib/i18n.ts';
+	import { loadLanguage } from '#lib/game/storage.ts';
+	import Seo from '#lib/components/Seo.svelte';
 
 	// Die Sprachweiche muss im Browser laufen: beim statischen Build gibt es keinen Server, der Accept-Language auswerten könnte.
 	onMount(() => {

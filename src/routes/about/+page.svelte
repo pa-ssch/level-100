@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import Seo from '$lib/components/Seo.svelte';
+	import Seo from '#lib/components/Seo.svelte';
 </script>
 
 <Seo
@@ -46,7 +46,8 @@
 			Level 100 ist ein eigenständiges Projekt und steht in keiner Verbindung zu „Phase 10“, „Stufe 10“, Contract Rummy, Twist oder
 			ähnlichen Spielen und deren Rechteinhabern. Es verwendet keine geschützten Marken, Grafiken, Texte oder Regelwerke; Spielenamen werden
 			nur zur Abgrenzung genannt und gehören den jeweiligen Inhabern. Details stehen im
-			<a href={resolve('/imprint')}>Impressum</a>.
+			<a href={resolve('imprint')}>Impressum</a>
+			.
 		</p>
 	</section>
 

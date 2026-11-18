@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
 
 	let {
 		title,

@@ -10,7 +10,7 @@ deren Rechteinhabern.
 
 ## Entwicklung
 
-Voraussetzung: Node 22 (siehe `.nvmrc`) und Yarn 4 (`corepack enable`).
+Voraussetzung: Node 24 (siehe `.nvmrc`) und Yarn 4 (`corepack enable`).
 
 ```bash
 yarn install
@@ -41,7 +41,7 @@ Gestaltung: Skizzen-Look wie [One Clue](https://github.com/pa-ssch/one-clue), sc
 `src/routes/global.scss`.
 
 Alle Seiten werden beim Build vorgerendert (`@sveltejs/adapter-static`). Die Content-Security-Policy steht als Meta-Tag in jeder
-Seite (`kit.csp` in `svelte.config.js`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0), die Handschrift „Patrick Hand“ (SIL OFL 1.1) wird selbst gehostet. Spielzustand und geteilte Regelsätze leben
+Seite (`csp.config.js`, eingebunden in `vite.config.ts`), ohne `unsafe-inline`; Icons sind Inline-SVG (Font Awesome Free, CC BY 4.0), die Handschrift „Patrick Hand“ (SIL OFL 1.1) wird selbst gehostet. Spielzustand und geteilte Regelsätze leben
 ausschließlich in der URL und im `localStorage` des Browsers.
 
 ## Deployment

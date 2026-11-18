@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { addBlock, blockCount, blockGroups, blocksFor, setBlockCount, type BlockGroup } from '$lib/game/blocks';
-	import type { CardDeck } from '$lib/game/deck';
-	import { REQUIREMENT_LIMITS, levelCards, type Requirement } from '$lib/game/requirements';
-	import { RULESET_LIMITS } from '$lib/game/ruleset';
-	import { describeLevel, describeRequirement, t, type StringKey } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
+	import { addBlock, blockCount, blockGroups, blocksFor, setBlockCount, type BlockGroup } from '#lib/game/blocks.ts';
+	import type { CardDeck } from '#lib/game/deck.ts';
+	import { REQUIREMENT_LIMITS, levelCards, type Requirement } from '#lib/game/requirements.ts';
+	import { RULESET_LIMITS } from '#lib/game/ruleset.ts';
+	import { describeLevel, describeRequirement, t, type StringKey } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
 	import Sheet from './Sheet.svelte';
 
 	let {

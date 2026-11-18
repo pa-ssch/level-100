@@ -1,26 +1,26 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { levelProblem } from '$lib/game/blocks';
-	import type { CardDeck } from '$lib/game/deck';
-	import { handSizeAfterDeckChange } from '$lib/game/decks';
-	import { estimateDifficulty } from '$lib/game/difficulty';
-	import { createGame } from '$lib/game/game';
-	import type { Requirement } from '$lib/game/requirements';
-	import { RULESET_LIMITS, copyRuleset, createRuleset, validateRuleset, type Level, type Ruleset } from '$lib/game/ruleset';
-	import { decodeRuleset } from '$lib/game/share';
-	import { loadRulesets, saveGame, saveRuleset } from '$lib/game/storage';
-	import { href, rulesetLinks } from '$lib/links';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
-	import BlockPicker from '$lib/components/BlockPicker.svelte';
-	import DeckPicker from '$lib/components/DeckPicker.svelte';
-	import HandSizeField from '$lib/components/HandSizeField.svelte';
-	import LevelRow from '$lib/components/LevelRow.svelte';
-	import Segmented from '$lib/components/Segmented.svelte';
-	import Seo from '$lib/components/Seo.svelte';
-	import Switch from '$lib/components/Switch.svelte';
+	import { levelProblem } from '#lib/game/blocks.ts';
+	import type { CardDeck } from '#lib/game/deck.ts';
+	import { handSizeAfterDeckChange } from '#lib/game/decks.ts';
+	import { estimateDifficulty } from '#lib/game/difficulty.ts';
+	import { createGame } from '#lib/game/game.ts';
+	import type { Requirement } from '#lib/game/requirements.ts';
+	import { RULESET_LIMITS, copyRuleset, createRuleset, validateRuleset, type Level, type Ruleset } from '#lib/game/ruleset.ts';
+	import { decodeRuleset } from '#lib/game/share.ts';
+	import { loadRulesets, saveGame, saveRuleset } from '#lib/game/storage.ts';
+	import { href, rulesetLinks } from '#lib/links.ts';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
+	import BlockPicker from '#lib/components/BlockPicker.svelte';
+	import DeckPicker from '#lib/components/DeckPicker.svelte';
+	import HandSizeField from '#lib/components/HandSizeField.svelte';
+	import LevelRow from '#lib/components/LevelRow.svelte';
+	import Segmented from '#lib/components/Segmented.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import Switch from '#lib/components/Switch.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -201,6 +201,7 @@
 		/>
 
 		<h2 class="q">{t(language, 'handSizeQ')}</h2>
+
 		<HandSizeField value={handSize} deck={ruleset.deck} {language} onchange={(n) => setHandSize(ruleset, n)} />
 
 		<h2 class="q">{t(language, 'modeQ')}</h2>

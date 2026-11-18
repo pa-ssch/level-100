@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { href } from '$lib/links';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
-	import Seo from '$lib/components/Seo.svelte';
+	import { href } from '#lib/links.ts';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
+	import Seo from '#lib/components/Seo.svelte';
 
 	let language = $derived(page.params.language);
 </script>

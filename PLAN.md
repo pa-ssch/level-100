@@ -57,10 +57,11 @@ mit Tests und automatischem Deploy. Qualitätsmaßstab: der Stand von one-clue /
 ### Phase 0 – Aufräumen und Fundament (½ Tag)
 
 - [x] `package.json`: Name auf `level-100`, `version`, `license`, `engines.node >= 22`; `scss` und `svelte-preprocess` entfernen.
-- [x] `svelte.config.js`: nur `vitePreprocess()`; `eslint.config.js` auf eslint-plugin-svelte 3 umgestellt (Regel `no-navigation-without-resolve` aktiv, alle Links über `resolve()`).
+- [x] Kit-Konfiguration liegt seit Kit 3 in `vite.config.ts` (`sveltekit({ … })`), die CSP in `csp.config.js`; `eslint.config.js` auf eslint-plugin-svelte 3 umgestellt (Regel `no-navigation-without-resolve` aktiv, alle Links über `resolve()`).
 - [x] `package-lock.json` löschen, `.DS_Store` aus Git entfernen (`git rm --cached`), `.nvmrc` (22) anlegen.
 - [x] Dependencies aktualisiert (svelte 5.57, kit 2.70, vite 6.4, eslint 9.39, vitest 4), Audit: 0 high/critical. `uuid` durch `crypto.randomUUID()` ersetzt.
-- [ ] **Später:** Kit 3 / Vite 8 / ESLint 10 / TypeScript 6 brauchen Node ≥ 22.17 (lokal ist 22.11 ohne Versionsmanager). Nach Node-Update: `npx sv migrate` prüfen, `.nvmrc` anheben.
+- [x] Kit 3 / Vite 8 / Vitest 5 / TypeScript 6 (18.11.2026, wegen GHSA-3r8g-jcqq-3p5j ohne Fix für Kit 2): Node 24 per Homebrew (`node@24`), `.nvmrc` auf 24, `npx sv migrate sveltekit-3` (Imports `#lib/*`, `$app/env`, `src/params.ts`, Hooks aus `@sveltejs/kit/hooks`), `handleError` filtert nach `kind`, `page.url` ist schreibgeschützt, Session-Storage-Schlüssel von Kit 3 (`sveltekit:snapshot`, `navigation-snapshot`, `history-info`, `metadata`; Scrollpositionen und Navigationsverlauf, von der Datenschutzerklärung abgedeckt) in `e2e/helpers.ts` übernommen.
+- [ ] **Später:** ESLint 10 (typescript-eslint muss es unterstützen).
 - [x] `Nester.svelte`, `static/levels.json`, Test-Buttons im Footer, 4-fache Fehlerausgabe entfernen; CSS-Komma fixen.
 - [x] Modell nach `src/lib/ruleset.ts`, i18n-Helfer in `src/lib/i18n.ts`, erste Vitest-Tests (`yarn test`), `lang`-Attribut per `hooks.server.ts` je Sprache, Sprachwechsel im Footer als echter Link.
 - [x] Dynamische Routen `prepare/[id]` und `play/[id]` zu statischen Seiten `prepare` und `play` mit Query-Parameter `?r=` umgebaut (Entscheidung 2).

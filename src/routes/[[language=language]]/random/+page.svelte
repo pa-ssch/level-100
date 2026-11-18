@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { CardDeck } from '$lib/game/deck';
-	import { handSizeAfterDeckChange } from '$lib/game/decks';
-	import { createGame } from '$lib/game/game';
+	import type { CardDeck } from '#lib/game/deck.ts';
+	import { handSizeAfterDeckChange } from '#lib/game/decks.ts';
+	import { createGame } from '#lib/game/game.ts';
 	import {
 		LEVELS_PER_DURATION,
 		MINUTES_PER_LEVEL,
@@ -14,18 +14,18 @@
 		type Candidate,
 		type DifficultyPreset,
 		type Duration
-	} from '$lib/game/generator';
-	import { RULESET_LIMITS, createRuleset, type Level, type Ruleset } from '$lib/game/ruleset';
-	import { loadDecks, saveGame, saveRuleset } from '$lib/game/storage';
-	import { href, rulesetLinks } from '$lib/links';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
-	import DeckPicker from '$lib/components/DeckPicker.svelte';
-	import HandSizeField from '$lib/components/HandSizeField.svelte';
-	import LevelRow from '$lib/components/LevelRow.svelte';
-	import Segmented from '$lib/components/Segmented.svelte';
-	import Seo from '$lib/components/Seo.svelte';
-	import Switch from '$lib/components/Switch.svelte';
+	} from '#lib/game/generator.ts';
+	import { RULESET_LIMITS, createRuleset, type Level, type Ruleset } from '#lib/game/ruleset.ts';
+	import { loadDecks, saveGame, saveRuleset } from '#lib/game/storage.ts';
+	import { href, rulesetLinks } from '#lib/links.ts';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
+	import DeckPicker from '#lib/components/DeckPicker.svelte';
+	import HandSizeField from '#lib/components/HandSizeField.svelte';
+	import LevelRow from '#lib/components/LevelRow.svelte';
+	import Segmented from '#lib/components/Segmented.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import Switch from '#lib/components/Switch.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -140,6 +140,7 @@
 	/>
 
 	<h2 class="q">{t(language, 'handSizeQ')}</h2>
+
 	<HandSizeField value={ruleset.levels[0].handSize} deck={ruleset.deck} {language} onchange={setHandSize} />
 
 	<h2 class="q">{t(language, 'durationQ')}</h2>
@@ -210,7 +211,10 @@
 	<div class="actions">
 		<button type="button" class="primary big" onclick={play}><Icon name="play" /> {t(language, 'play')}</button>
 	</div>
-	<p class="hint"><button type="button" class="secondary" onclick={() => (step = 'setup')}>{t(language, 'back')}</button></p>
+
+	<p class="hint">
+		<button type="button" class="secondary" onclick={() => (step = 'setup')}>{t(language, 'back')}</button>
+	</p>
 {/if}
 
 <style lang="scss">

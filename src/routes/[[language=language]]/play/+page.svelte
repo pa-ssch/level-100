@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
-	import { GAME_LIMITS, applyRound, createGame, currentLevel, isFinished, openLevels, restartGame, type Game } from '$lib/game/game';
-	import { levelCards } from '$lib/game/requirements';
-	import type { Ruleset } from '$lib/game/ruleset';
-	import { decodeRuleset } from '$lib/game/share';
-	import { loadGame, removeGame, saveGame, saveRuleset } from '$lib/game/storage';
-	import { href } from '$lib/links';
-	import { describeLevel, displayName, t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
+	import { GAME_LIMITS, applyRound, createGame, currentLevel, isFinished, openLevels, restartGame, type Game } from '#lib/game/game.ts';
+	import { levelCards } from '#lib/game/requirements.ts';
+	import type { Ruleset } from '#lib/game/ruleset.ts';
+	import { decodeRuleset } from '#lib/game/share.ts';
+	import { loadGame, removeGame, saveGame, saveRuleset } from '#lib/game/storage.ts';
+	import { href } from '#lib/links.ts';
+	import { describeLevel, displayName, t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
 	import { goto } from '$app/navigation';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-	import InviteDialog from '$lib/components/InviteDialog.svelte';
-	import Seo from '$lib/components/Seo.svelte';
-	import Sheet from '$lib/components/Sheet.svelte';
+	import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
+	import InviteDialog from '#lib/components/InviteDialog.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import Sheet from '#lib/components/Sheet.svelte';
 
 	let language = $derived(page.params.language);
 
@@ -91,7 +91,8 @@
 
 	let inviteUrl = $derived.by(() => {
 		if (!browser) return '';
-		const url = new URL(page.url);
+		// page.url ist schreibgeschützt; für den Einladungslink eine veränderbare Kopie
+		const url = new URL(page.url.href);
 		url.searchParams.delete('go');
 		return url.toString();
 	});
@@ -125,9 +126,10 @@
 		<p class="meta">{t(language, 'joinMore', { n: ruleset.levels.length - 3 })}</p>
 	{/if}
 	<div class="actions">
-		<button type="button" class="primary big" onclick={() => start(ruleset)}
-			><Icon name="play" /> {view.again ? t(language, 'playAgain') : t(language, 'joinPlay')}</button
-		>
+		<button type="button" class="primary big" onclick={() => start(ruleset)}>
+			<Icon name="play" />
+			{view.again ? t(language, 'playAgain') : t(language, 'joinPlay')}
+		</button>
 	</div>
 	<p class="meta">{t(language, 'joinSaved')}</p>
 {:else if view.status === 'playing'}
@@ -248,6 +250,7 @@
 
 	{#if entry}
 		{@const draft = entry}
+
 		<Sheet title={t(language, 'pointsSheet')} {language} onclose={() => (entry = null)}>
 			<form
 				class="points"

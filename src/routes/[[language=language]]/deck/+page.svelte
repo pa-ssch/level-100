@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { DECK_LIMITS, DECK_PRESETS, deckSize, type CardDeck } from '$lib/game/deck';
-	import { DECK_NAME_LIMIT, clampHandSize, createSavedDeck, defaultJokers } from '$lib/game/decks';
-	import { loadRulesets, saveDeck, saveRuleset } from '$lib/game/storage';
-	import { href } from '$lib/links';
-	import { t } from '$lib/i18n';
-	import Icon from '$lib/Icon.svelte';
-	import Seo from '$lib/components/Seo.svelte';
+	import { DECK_LIMITS, DECK_PRESETS, deckSize, type CardDeck } from '#lib/game/deck.ts';
+	import { DECK_NAME_LIMIT, clampHandSize, createSavedDeck, defaultJokers } from '#lib/game/decks.ts';
+	import { loadRulesets, saveDeck, saveRuleset } from '#lib/game/storage.ts';
+	import { href } from '#lib/links.ts';
+	import { t } from '#lib/i18n.ts';
+	import Icon from '#lib/Icon.svelte';
+	import Seo from '#lib/components/Seo.svelte';
 
 	let language = $derived(page.params.language);
 	// Joker muss man nicht angeben: zwei je Satz, solange niemand etwas anderes einträgt.

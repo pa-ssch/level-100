@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { href } from '$lib/links';
-	import { t } from '$lib/i18n';
-	import Seo from '$lib/components/Seo.svelte';
+	import { href } from '#lib/links.ts';
+	import { t } from '#lib/i18n.ts';
+	import Seo from '#lib/components/Seo.svelte';
 
 	let language = $derived(page.params.language);
 	const steps = ['how1', 'how2', 'how3', 'how4', 'how5'] as const;

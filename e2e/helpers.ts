@@ -53,10 +53,8 @@ export const ALLOWED_LOCAL_STORAGE_KEYS = ['level100.rulesets', 'level100.games'
 
 /** Session-Storage-Einträge von SvelteKit (Scrollposition, Navigationsverlauf); in der Datenschutzerklärung genannt. */
 export const ALLOWED_SESSION_STORAGE_KEYS = [
-	'sveltekit:scroll',
 	'sveltekit:snapshot',
-	'sveltekit:history',
-	'sveltekit:navigation',
-	'sveltekit:pageurl',
-	'sveltekit:states'
+	'sveltekit:navigation-snapshot',
+	'sveltekit:history-info',
+	'sveltekit:metadata'
 ];

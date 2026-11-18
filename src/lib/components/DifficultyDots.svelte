@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { t } from '#lib/i18n.ts';
 
 	let { difficulty, language }: { difficulty: number | undefined; language: string | undefined } = $props();
 	let filled = $derived(difficulty === undefined ? 0 : Math.max(1, Math.ceil(difficulty / 2)));

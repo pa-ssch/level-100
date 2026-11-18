@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { SITE_NAME, SITE_URL } from '$lib/site';
-	import { htmlLang, isLanguage } from '$lib/i18n';
+	import { SITE_NAME, SITE_URL } from '#lib/site.ts';
+	import { htmlLang, isLanguage } from '#lib/i18n.ts';
 
 	let { title, description }: { title: string; description: string } = $props();
 
