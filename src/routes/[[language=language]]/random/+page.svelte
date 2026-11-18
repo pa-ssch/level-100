@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { CardDeck } from '$lib/game/deck';
+	import { handSizeAfterDeckChange } from '$lib/game/decks';
 	import { createGame } from '$lib/game/game';
 	import {
 		LEVELS_PER_DURATION,
@@ -20,6 +21,7 @@
 	import { t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
 	import DeckPicker from '$lib/components/DeckPicker.svelte';
+	import HandSizeField from '$lib/components/HandSizeField.svelte';
 	import LevelRow from '$lib/components/LevelRow.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import Seo from '$lib/components/Seo.svelte';
@@ -48,12 +50,17 @@
 		const deckId = page.url.searchParams.get('deck');
 		if (!deckId) return;
 		const saved = loadDecks().find((d) => d.id === deckId);
-		if (saved) setDeck({ ...saved.deck }, saved.handSize);
+		if (saved) setDeck({ ...saved.deck });
 	});
 
-	function setDeck(deck: CardDeck, handSize: number) {
-		ruleset.deck = deck;
+	function setHandSize(handSize: number) {
 		for (const level of ruleset.levels) level.handSize = handSize;
+	}
+
+	function setDeck(deck: CardDeck) {
+		const handSize = handSizeAfterDeckChange(ruleset.levels[0].handSize, $state.snapshot(ruleset.deck), deck);
+		ruleset.deck = deck;
+		setHandSize(handSize);
 	}
 
 	function ensureCandidates(): Candidate[] {
@@ -132,6 +139,9 @@
 		onchange={setDeck}
 	/>
 
+	<h2 class="q">{t(language, 'handSizeQ')}</h2>
+	<HandSizeField value={ruleset.levels[0].handSize} deck={ruleset.deck} {language} onchange={setHandSize} />
+
 	<h2 class="q">{t(language, 'durationQ')}</h2>
 	<Segmented
 		label={t(language, 'durationQ')}
@@ -153,15 +163,19 @@
 	/>
 	<p class="hint">{t(language, 'sortedHint')}</p>
 
+	<h2 class="q">{t(language, 'modeQ')}</h2>
+	<Segmented
+		label={t(language, 'modeQ')}
+		options={[
+			{ value: 'fixed', label: t(language, 'modeFixed') },
+			{ value: 'free', label: t(language, 'modeFree') }
+		]}
+		value={ruleset.mode}
+		onchange={(m) => (ruleset.mode = m)}
+	/>
+	<p class="hint">{ruleset.mode === 'free' ? t(language, 'orderHintFree') : t(language, 'orderHintFixed')}</p>
+
 	<div class="toggles">
-		<Switch
-			id="mode"
-			checked={ruleset.mode === 'free'}
-			onLabel={t(language, 'orderToggleFree')}
-			offLabel={t(language, 'orderToggle')}
-			onchange={(v) => (ruleset.mode = v ? 'free' : 'fixed')}
-		/>
-		<p class="toggle-hint">{ruleset.mode === 'free' ? t(language, 'orderHintFree') : t(language, 'orderHintFixed')}</p>
 		<Switch
 			id="points"
 			checked={ruleset.points}
@@ -186,7 +200,7 @@
 	</label>
 
 	{#each ruleset.levels as level, i (i)}
-		<LevelRow {level} index={i} deck={ruleset.deck} {language} onreroll={() => reroll(i)} />
+		<LevelRow {level} index={i} deck={ruleset.deck} {language} numbered={ruleset.mode === 'fixed'} onreroll={() => reroll(i)} />
 	{/each}
 
 	<div class="actions">

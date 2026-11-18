@@ -113,20 +113,30 @@ test('Editor: Level aus Bausteinen, Drag & Drop, sortieren, Verlauf-Menü mit Du
 	const level1 = page.getByRole('group', { name: 'Level 1' });
 	await expect(level1).toContainText('2× three of a kind');
 
-	// Level 2 anlegen: Blatt öffnet sich, Baustein wählen, zweiten dazu
+	// Level 2 anlegen: Blatt öffnet sich, Bausteine anhaken, Zähler, wieder abhaken; alles wirkt sofort
 	await page.getByRole('button', { name: 'Level', exact: true }).click();
-	await expect(page.getByRole('heading', { name: 'Pick a block' })).toBeVisible();
-	await page.getByRole('button', { name: 'pair', exact: true }).click();
+	await expect(page.getByRole('heading', { name: 'Blocks for level 2' })).toBeVisible();
+	const pair = page.getByRole('checkbox', { name: 'pair', exact: true });
+	await pair.click();
+	await expect(pair).toBeChecked();
 	const level2 = page.getByRole('group', { name: 'Level 2' });
 	await expect(level2).toContainText('pair');
-	await level2.getByRole('button', { name: 'Block', exact: true }).click();
-	await page.getByRole('button', { name: 'More blocks' }).click();
-	await page.getByRole('button', { name: 'run of 9', exact: true }).click();
-	await expect(level2).toContainText('run of 9');
-	await level2.getByRole('button', { name: 'Remove block: run of 9' }).click();
+	await page.getByRole('button', { name: 'More: pair' }).click();
+	await expect(level2).toContainText('2× pair');
+	await page.getByRole('button', { name: 'Fewer: pair' }).click();
+	await page.getByRole('checkbox', { name: 'run of 9', exact: true }).click();
+	await expect(level2).toContainText('pair + run of 9');
+	await expect(level2.getByRole('alert')).toContainText('Needs more cards');
+	await page.getByRole('checkbox', { name: 'run of 9', exact: true }).click();
 	await expect(level2).not.toContainText('run of 9');
-	await level2.getByRole('button', { name: 'Block', exact: true }).click();
-	await page.getByRole('button', { name: 'run of 4 in one suit', exact: true }).click();
+	await page.getByRole('button', { name: 'Done' }).click();
+	await expect(page.getByRole('heading', { name: 'Blocks for level 2' })).toHaveCount(0);
+	// Erneut öffnen über die Zeile, Farbfolge dazu
+	await level2.getByTitle('Change blocks').click();
+	await page.getByRole('checkbox', { name: 'run of 4 in one suit', exact: true }).click();
+	await page.getByRole('button', { name: 'Done' }).click();
+	await expect(level2).toContainText('pair + run of 4 in one suit');
+	await expect(level2.getByRole('alert')).toHaveCount(0);
 
 	// Drag & Drop: Level 2 über Level 1 ziehen
 	await page.getByRole('button', { name: 'Move level 2' }).dragTo(page.getByRole('group', { name: 'Level 1' }));
@@ -137,8 +147,9 @@ test('Editor: Level aus Bausteinen, Drag & Drop, sortieren, Verlauf-Menü mit Du
 	await page.getByRole('button', { name: 'Sort by difficulty' }).click();
 	await expect(page.getByRole('group', { name: /^Level \d+$/ })).toHaveCount(2);
 
-	// Level-Menü: duplizieren, entfernen
+	// Level-Menü: duplizieren, entfernen (kein „nach oben/unten“, dafür gibt es den Griff)
 	await page.getByRole('button', { name: 'Menu for level 2' }).click();
+	await expect(page.getByRole('menuitem', { name: 'Move up' })).toHaveCount(0);
 	await page.getByRole('menuitem', { name: 'Duplicate' }).click();
 	await expect(page.getByRole('group', { name: /^Level \d+$/ })).toHaveCount(3);
 	await page.getByRole('button', { name: 'Menu for level 3' }).click();
@@ -177,6 +188,44 @@ test('Editor: Level aus Bausteinen, Drag & Drop, sortieren, Verlauf-Menü mit Du
 	expect(errors).toEqual([]);
 });
 
+test('Editor: nicht schaffbare Level sind markiert und sperren „Spielen“; eigener Text und fester Wert', async ({ page, browserName }) => {
+	const errors = watchErrors(page, browserName);
+	await page.goto('/en-US/prepare');
+	const level1 = page.getByRole('group', { name: 'Level 1' });
+	const play = page.getByRole('button', { name: 'Play' });
+	await expect(play).toBeEnabled();
+	// Zwei Drillinge brauchen sechs Karten: mit fünf Handkarten nicht schaffbar
+	await page.getByLabel('Cards in hand').fill('5');
+	await page.getByLabel('Cards in hand').press('Tab');
+	await expect(level1.getByRole('alert')).toContainText('Needs more cards');
+	await expect(play).toBeDisabled();
+	await expect(page.getByText('Fix the marked levels first')).toBeVisible();
+	await page.getByRole('button', { name: '+' }).click();
+	await expect(level1.getByRole('alert')).toHaveCount(0);
+	await expect(play).toBeEnabled();
+
+	// Eigener Text: mehrere nacheinander, fester Wert, Beschreibung in der Zeile
+	await level1.getByTitle('Change blocks').click();
+	await page.getByLabel('Custom text').fill('A monkey');
+	await page.getByLabel('Custom text').press('Enter');
+	await expect(page.getByRole('checkbox', { name: 'A monkey' })).toBeChecked();
+	await expect(page.getByLabel('Custom text')).toHaveValue('');
+	await page.getByLabel('Custom text').fill('A banana');
+	await page.getByRole('button', { name: 'Add' }).last().click();
+	await page.getByLabel('Fixed value').selectOption('8');
+	await page.getByRole('button', { name: 'Add' }).first().click();
+	await expect(level1).toContainText('2× three of a kind + A monkey + A banana + three of a kind of 8s');
+	await page.getByRole('checkbox', { name: 'A monkey' }).click();
+	await page.getByRole('button', { name: 'Done' }).click();
+	await expect(level1).toContainText('2× three of a kind + A banana + three of a kind of 8s');
+
+	// Freie Reihenfolge: keine Nummern mehr vor den Leveln
+	await expect(level1.locator('.n')).toHaveText('1');
+	await page.getByRole('radio', { name: 'Any order' }).click();
+	await expect(level1.locator('.n')).toHaveCount(0);
+	expect(errors).toEqual([]);
+});
+
 test('Name ist optional: ohne Namen heißt das Spiel nach seiner Levelzahl', async ({ page }) => {
 	await page.goto('/de-DE/prepare');
 	await page.getByRole('button', { name: 'Spielen' }).click();
@@ -199,9 +248,12 @@ test('Eigenes Deck anlegen, verwenden und wieder löschen', async ({ page, brows
 	await page.getByLabel('Größter Wert').press('Tab');
 	await page.getByLabel('Sätze').fill('1');
 	await page.getByLabel('Sätze').press('Tab');
+	// Joker muss man nicht angeben: zwei je Satz, änderbar
+	await expect(page.getByText('34 Karten · 2 Joker')).toBeVisible();
+	await page.getByRole('button', { name: 'Ändern' }).click();
 	await page.getByLabel('Joker').fill('0');
 	await page.getByLabel('Joker').press('Tab');
-	await expect(page.getByText('32 Karten')).toBeVisible();
+	await expect(page.getByText('32 Karten · 0 Joker')).toBeVisible();
 	await page.getByRole('button', { name: 'Deck speichern und verwenden' }).click();
 	await expect(page).toHaveURL(/\/de-DE\/prepare\?id=/);
 	await expect(page.getByLabel('Name')).toHaveValue('Skatrunde');
@@ -222,11 +274,13 @@ test('freier Modus und Punkte aus: Level als Kacheln in beliebiger Reihenfolge, 
 	await page.goto('/en-US/prepare');
 	await page.getByLabel('Name').fill('Free');
 	await page.getByRole('button', { name: 'Level', exact: true }).click();
-	await page.getByRole('button', { name: 'pair', exact: true }).click();
+	await page.getByRole('checkbox', { name: 'pair', exact: true }).click();
+	await page.getByRole('button', { name: 'Done' }).click();
 	await page.getByRole('button', { name: 'Level', exact: true }).click();
-	await page.getByRole('button', { name: 'run of 4', exact: true }).click();
-	await page.getByRole('switch', { name: 'Levels in order' }).click();
-	await expect(page.getByRole('switch', { name: 'Levels in any order' })).toBeChecked();
+	await page.getByRole('checkbox', { name: 'run of 4', exact: true }).click();
+	await page.getByRole('button', { name: 'Done' }).click();
+	await page.getByRole('radio', { name: 'Any order' }).click();
+	await expect(page.getByRole('radio', { name: 'Any order' })).toHaveAttribute('aria-checked', 'true');
 	await page.getByRole('switch', { name: 'Count points' }).click();
 	await expect(page.getByRole('switch', { name: 'No points' })).not.toBeChecked();
 	await page.getByRole('button', { name: 'Play' }).click();
@@ -247,7 +301,7 @@ test('freier Modus und Punkte aus: Level als Kacheln in beliebiger Reihenfolge, 
 
 test('freier Modus mit Punkten: Kachel „Runde vorbei“ und Punkteblatt', async ({ page }) => {
 	await page.goto('/de-DE/prepare');
-	await page.getByRole('switch', { name: 'Level der Reihe nach' }).click();
+	await page.getByRole('radio', { name: 'Frei wählbar' }).click();
 	await page.getByRole('button', { name: 'Spielen' }).click();
 	await page.getByRole('button', { name: 'Runde vorbei, nicht geschafft' }).click();
 	await page.getByRole('button', { name: '+5' }).click();
@@ -319,7 +373,7 @@ test('Hinweise erklären Deck, Reihenfolge und Punkte', async ({ page }) => {
 	await page.goto('/de-DE/random');
 	await expect(page.getByText('Mit welchen echten Karten ihr spielt')).toBeVisible();
 	await expect(page.getByText('Alle beginnen bei Level 1')).toBeVisible();
-	await page.getByRole('switch', { name: 'Level der Reihe nach' }).click();
+	await page.getByRole('radio', { name: 'Frei wählbar' }).click();
 	await expect(page.getByText('Jede Runde darf ein beliebiges')).toBeVisible();
 	await expect(page.getByText('Restkarten auf seiner Hand')).toBeVisible();
 	await page.getByRole('switch', { name: 'Punkte zählen' }).click();

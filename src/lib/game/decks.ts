@@ -2,20 +2,37 @@ import { DECK_LIMITS, DECK_PRESETS, deckSize, type CardDeck } from './deck';
 import { newId } from './id';
 import { RULESET_LIMITS } from './ruleset';
 
-/** Ein gespeichertes Deck: die Kartenbeschreibung plus Name und Standard-Handkarten. */
+/** Ein gespeichertes Deck: die Kartenbeschreibung plus Name. Handkarten gehören zum Spiel, nicht zum Deck. */
 export interface SavedDeck {
 	id: string;
 	name: string;
 	deck: CardDeck;
-	handSize: number;
 }
 
 export const DECK_NAME_LIMIT = 40;
 
-/** Standard-Handkarten je Deck: 10, bei kleinen Decks weniger. */
+/** Joker, wenn man keine angibt: zwei je Kartensatz, wie bei den meisten gekauften Decks. */
+export function defaultJokers(copies: number): number {
+	return Math.min(DECK_LIMITS.jokers.max, 2 * copies);
+}
+
+/** Standard-Handkarten je Deck: 10, beim Pokerblatt 7, bei kleinen Decks weniger. */
 export function defaultHandSize(deck: CardDeck): number {
 	const preset = JSON.stringify(deck) === JSON.stringify(DECK_PRESETS.poker) ? 7 : 10;
-	return Math.max(RULESET_LIMITS.handSize.min, Math.min(preset, deckSize(deck)));
+	return clampHandSize(preset, deck);
+}
+
+/** Begrenzt Handkarten auf das Erlaubte und auf das, was im Deck steckt. */
+export function clampHandSize(handSize: number, deck: CardDeck): number {
+	return Math.max(RULESET_LIMITS.handSize.min, Math.min(RULESET_LIMITS.handSize.max, deckSize(deck), handSize));
+}
+
+/**
+ * Handkarten nach einem Deckwechsel: Wer den Standardwert nie angefasst hat, bekommt den Standard des neuen Decks;
+ * ein eigener Wert bleibt, soweit das neue Deck ihn hergibt.
+ */
+export function handSizeAfterDeckChange(handSize: number, from: CardDeck, to: CardDeck): number {
+	return handSize === defaultHandSize(from) ? defaultHandSize(to) : clampHandSize(handSize, to);
 }
 
 export function presetOf(deck: CardDeck): 'standard' | 'poker' | null {
@@ -26,7 +43,7 @@ export function presetOf(deck: CardDeck): 'standard' | 'poker' | null {
 
 export function createSavedDeck(partial: Partial<SavedDeck> = {}): SavedDeck {
 	const deck = partial.deck ?? { ...DECK_PRESETS.standard };
-	return { id: partial.id ?? newId(), name: partial.name ?? '', deck, handSize: partial.handSize ?? defaultHandSize(deck) };
+	return { id: partial.id ?? newId(), name: partial.name ?? '', deck };
 }
 
 export function validateSavedDeck(input: unknown): SavedDeck | null {
@@ -36,13 +53,8 @@ export function validateSavedDeck(input: unknown): SavedDeck | null {
 	if (typeof d.name !== 'string' || d.name.length > DECK_NAME_LIMIT || /[\p{Cc}]/u.test(d.name)) return null;
 	const deck = validateDeckShape(d.deck);
 	if (deck === null) return null;
-	const handSize =
-		Number.isInteger(d.handSize) &&
-		(d.handSize as number) >= RULESET_LIMITS.handSize.min &&
-		(d.handSize as number) <= Math.min(RULESET_LIMITS.handSize.max, deckSize(deck))
-			? (d.handSize as number)
-			: defaultHandSize(deck);
-	return { id: d.id, name: d.name, deck, handSize };
+	// Ältere Einträge tragen noch `handSize`; das gehört heute zum Spiel und fällt hier weg.
+	return { id: d.id, name: d.name, deck };
 }
 
 function validateDeckShape(input: unknown): CardDeck | null {

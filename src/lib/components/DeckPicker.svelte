@@ -2,7 +2,7 @@
 	import { untrack } from 'svelte';
 	import type { ResolvedPathname } from '$app/types';
 	import { DECK_PRESETS, type CardDeck } from '$lib/game/deck';
-	import { defaultHandSize, presetOf, type SavedDeck } from '$lib/game/decks';
+	import { presetOf, type SavedDeck } from '$lib/game/decks';
 	import { loadDecks, removeDeck } from '$lib/game/storage';
 	import { t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
@@ -13,8 +13,7 @@
 		language,
 		newDeckHref,
 		onchange
-	}: { deck: CardDeck; language: string | undefined; newDeckHref: ResolvedPathname; onchange: (deck: CardDeck, handSize: number) => void } =
-		$props();
+	}: { deck: CardDeck; language: string | undefined; newDeckHref: ResolvedPathname; onchange: (deck: CardDeck) => void } = $props();
 
 	let saved = $state<SavedDeck[]>([]);
 	let expanded = $state(false);
@@ -42,7 +41,7 @@
 		role="radio"
 		aria-checked={selected === 'standard'}
 		class:on={selected === 'standard'}
-		onclick={() => onchange({ ...DECK_PRESETS.standard }, defaultHandSize(DECK_PRESETS.standard))}
+		onclick={() => onchange({ ...DECK_PRESETS.standard })}
 	>
 		<strong>{t(language, 'deckStandard')}</strong><small>{t(language, 'deckStandardHint')}</small>
 	</button>
@@ -51,7 +50,7 @@
 		role="radio"
 		aria-checked={selected === 'poker'}
 		class:on={selected === 'poker'}
-		onclick={() => onchange({ ...DECK_PRESETS.poker }, defaultHandSize(DECK_PRESETS.poker))}
+		onclick={() => onchange({ ...DECK_PRESETS.poker })}
 	>
 		<strong>{t(language, 'deckPoker')}</strong><small>{t(language, 'deckPokerHint')}</small>
 	</button>
@@ -71,7 +70,7 @@
 	{#if expanded}
 		{#each saved as d (d.id)}
 			<div class="saved" class:on={selected === d.id}>
-				<button type="button" role="radio" aria-checked={selected === d.id} onclick={() => onchange({ ...d.deck }, d.handSize)}>
+				<button type="button" role="radio" aria-checked={selected === d.id} onclick={() => onchange({ ...d.deck })}>
 					<strong>{d.name || t(language, 'deckCustom')}</strong><small
 						>{t(language, 'deckSummary', {
 							min: d.deck.minValue,

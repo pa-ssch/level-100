@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { levelProblem } from '$lib/game/blocks';
 	import { estimateDifficulty } from '$lib/game/difficulty';
 	import type { CardDeck } from '$lib/game/deck';
-	import { levelCards } from '$lib/game/requirements';
 	import type { Level } from '$lib/game/ruleset';
-	import { describeLevel, describeRequirement, t } from '$lib/i18n';
+	import { describeLevel, t } from '$lib/i18n';
 	import Icon from '$lib/Icon.svelte';
 	import DifficultyDots from './DifficultyDots.svelte';
 	import Menu, { type MenuItem } from './Menu.svelte';
@@ -13,36 +13,49 @@
 		index,
 		deck,
 		language,
+		numbered = true,
 		editable = false,
 		dragging = false,
 		menu = [],
-		onaddblock,
-		onremoveblock,
+		onedit,
 		onreroll,
 		ondragstart,
 		ondragmove,
-		ondragend
+		ondragend,
+		onmove
 	}: {
 		level: Level;
 		index: number;
 		deck: CardDeck;
 		language: string | undefined;
+		/** Bei freier Reihenfolge haben die Level keine Nummer. */
+		numbered?: boolean;
 		editable?: boolean;
 		dragging?: boolean;
 		menu?: MenuItem[];
-		onaddblock?: () => void;
-		onremoveblock?: (i: number) => void;
+		onedit?: () => void;
 		onreroll?: () => void;
 		ondragstart?: (e: PointerEvent) => void;
 		ondragmove?: (e: PointerEvent) => void;
 		ondragend?: (e: PointerEvent) => void;
+		/** Tastatur-Alternative zum Ziehen: eine Position nach oben (-1) oder unten (+1). */
+		onmove?: (delta: -1 | 1) => void;
 	} = $props();
 
 	let estimate = $derived(estimateDifficulty(deck, level.handSize, level.requirements));
-	let tooMany = $derived(levelCards(level.requirements) > level.handSize);
+	let problem = $derived(levelProblem(deck, level.handSize, level.requirements));
+	let empty = $derived(level.requirements.length === 0);
 </script>
 
-<div class="level" class:editable class:dragging aria-label={t(language, 'level', { n: index + 1 })} role="group" data-level-index={index}>
+<div
+	class="level"
+	class:editable
+	class:dragging
+	class:invalid={problem !== null}
+	aria-label={t(language, 'level', { n: index + 1 })}
+	role="group"
+	data-level-index={index}
+>
 	{#if ondragstart}
 		<button
 			type="button"
@@ -56,36 +69,34 @@
 			onpointermove={ondragmove}
 			onpointerup={ondragend}
 			onpointercancel={ondragend}
+			onkeydown={(e) => {
+				if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+				e.preventDefault();
+				onmove?.(e.key === 'ArrowUp' ? -1 : 1);
+			}}
 		>
 			<Icon name="grip-vertical" />
 		</button>
 	{/if}
-	<span class="n">{index + 1}</span>
+	{#if numbered}
+		<span class="n">{index + 1}</span>
+	{/if}
 	<div class="body">
 		{#if editable}
-			<div class="chips">
-				{#each level.requirements as r, i (i)}
-					<button
-						type="button"
-						class="chip"
-						onclick={() => onremoveblock?.(i)}
-						aria-label={t(language, 'removeBlock', { b: describeRequirement(language, r) })}
-						title={t(language, 'removeBlock', { b: describeRequirement(language, r) })}
-					>
-						{describeRequirement(language, r)}
-						<Icon name="xmark" />
-					</button>
-				{/each}
-				<button type="button" class="chip add" onclick={onaddblock}><Icon name="plus" /> {t(language, 'addBlock')}</button>
-			</div>
-			{#if level.requirements.length === 0}
-				<small class="hint">{t(language, 'levelEmpty')}</small>
-			{/if}
+			<!-- Die Bausteine werden nur im Blatt geändert; die Zeile öffnet es. -->
+			<button type="button" class="pick" class:empty onclick={onedit} title={t(language, 'editBlocks')}>
+				{#if empty}
+					<Icon name="plus" /> {t(language, 'blockPick')}
+				{:else}
+					<span class="desc">{describeLevel(language, level.requirements)}</span>
+					<Icon name="pen" />
+				{/if}
+			</button>
 		{:else}
 			<span class="desc">{describeLevel(language, level.requirements)}</span>
 		{/if}
-		{#if tooMany}
-			<small class="warn-text" role="alert">{t(language, 'tooManyCards')}</small>
+		{#if problem}
+			<small class="warn-text" role="alert">{t(language, problem)}</small>
 		{/if}
 	</div>
 	<DifficultyDots difficulty={estimate.difficulty} {language} />
@@ -119,6 +130,12 @@
 			box-shadow: 4px 4px 0 var(--border);
 		}
 
+		&.invalid {
+			border-style: dashed;
+			border-color: var(--warn);
+			background: repeating-linear-gradient(-45deg, var(--surface) 0 10px, var(--accent-soft) 10px 12px);
+		}
+
 		.grip {
 			touch-action: none;
 			cursor: grab;
@@ -147,30 +164,40 @@
 		.desc {
 			font-weight: bold;
 		}
-
-		.hint {
-			opacity: 0.7;
-		}
 	}
 
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
-	}
-
-	.chip {
-		border-radius: 999px;
+	.pick {
+		justify-content: space-between;
+		gap: 8px;
+		width: 100%;
+		border: none;
+		border-radius: 0;
 		box-shadow: none;
-		padding: 4px 10px;
+		background: none;
+		padding: 4px 0;
 		font-family: inherit;
-		font-size: max(16px, 0.9em);
-		font-weight: bold;
+		font-size: max(16px, 1em);
+		text-align: left;
 
-		&.add {
-			border-style: dashed;
-			font-weight: normal;
+		&:active:not(:disabled) {
+			transform: none;
+		}
+
+		&:hover:not(:disabled) {
 			background: none;
+			text-decoration: underline;
+		}
+
+		&.empty {
+			justify-content: flex-start;
+			font-family: var(--font-hand);
+			font-size: max(16px, 1.1em);
+			opacity: 0.8;
+		}
+
+		.desc {
+			flex: 1;
+			min-width: 0;
 		}
 	}
 </style>

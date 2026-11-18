@@ -2,9 +2,8 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { DECK_LIMITS, deckSize, type CardDeck } from '$lib/game/deck';
-	import { DECK_NAME_LIMIT, createSavedDeck, defaultHandSize } from '$lib/game/decks';
-	import { RULESET_LIMITS } from '$lib/game/ruleset';
+	import { DECK_LIMITS, DECK_PRESETS, deckSize, type CardDeck } from '$lib/game/deck';
+	import { DECK_NAME_LIMIT, clampHandSize, createSavedDeck, defaultJokers } from '$lib/game/decks';
 	import { loadRulesets, saveDeck, saveRuleset } from '$lib/game/storage';
 	import { href } from '$lib/links';
 	import { t } from '$lib/i18n';
@@ -12,8 +11,10 @@
 	import Seo from '$lib/components/Seo.svelte';
 
 	let language = $derived(page.params.language);
-	let saved = $state(createSavedDeck());
-	let handTouched = $state(false);
+	// Joker muss man nicht angeben: zwei je Satz, solange niemand etwas anderes einträgt.
+	let saved = $state(createSavedDeck({ deck: { ...DECK_PRESETS.standard, jokers: defaultJokers(DECK_PRESETS.standard.copies) } }));
+	let jokersTouched = $state(false);
+	let jokersOpen = $state(false);
 
 	function clamp(event: Event, min: number, max: number): number {
 		const value = Number((event.target as HTMLInputElement).value);
@@ -24,9 +25,8 @@
 		const deck = { ...saved.deck, ...patch };
 		if (deck.maxValue < deck.minValue + 1) deck.maxValue = deck.minValue + 1;
 		if (deck.maxValue - deck.minValue + 1 > DECK_LIMITS.maxValues) deck.maxValue = deck.minValue + DECK_LIMITS.maxValues - 1;
+		if (!jokersTouched && patch.jokers === undefined) deck.jokers = defaultJokers(deck.copies);
 		saved.deck = deck;
-		if (!handTouched) saved.handSize = defaultHandSize(deck);
-		else saved.handSize = Math.min(saved.handSize, deckSize(deck));
 	}
 
 	/** Zurück dorthin, wo das Deck gebraucht wird: Editor (per Spiel-ID) oder Zufallsspiel. */
@@ -42,7 +42,7 @@
 			if (stored) {
 				const ruleset = stored.ruleset;
 				ruleset.deck = { ...deck.deck };
-				for (const level of ruleset.levels) level.handSize = deck.handSize;
+				for (const level of ruleset.levels) level.handSize = clampHandSize(level.handSize, deck.deck);
 				saveRuleset(ruleset);
 			}
 			goto(href('/[[language=language]]/prepare', language, { id }));
@@ -50,8 +50,6 @@
 			goto(href('/[[language=language]]/random', language, { deck: deck.id }));
 		}
 	}
-
-	const hand = RULESET_LIMITS.handSize;
 </script>
 
 <Seo title={t(language, 'deckEditorTitle')} description={t(language, 'metaPrepare')} />
@@ -99,31 +97,29 @@
 				onchange={(e) => setDeck({ copies: clamp(e, DECK_LIMITS.copies.min, DECK_LIMITS.copies.max) })}
 			/></label
 		>
-		<label
-			>{t(language, 'jokers')}<input
+	</div>
+	<p class="total">
+		{t(language, 'cardCount', { n: deckSize(saved.deck) })} · {t(language, 'jokersLine', { n: saved.deck.jokers })}
+		{#if !jokersOpen}
+			<button type="button" class="secondary small" onclick={() => (jokersOpen = true)}>{t(language, 'change')}</button>
+		{/if}
+	</p>
+	{#if jokersOpen}
+		<label class="field jokers">
+			{t(language, 'jokers')}
+			<input
 				type="number"
 				min={DECK_LIMITS.jokers.min}
 				max={DECK_LIMITS.jokers.max}
 				value={saved.deck.jokers}
-				onchange={(e) => setDeck({ jokers: clamp(e, DECK_LIMITS.jokers.min, DECK_LIMITS.jokers.max) })}
-			/></label
-		>
-	</div>
-	<p class="total">{t(language, 'cardCount', { n: deckSize(saved.deck) })}</p>
-	<label class="field hand">
-		{t(language, 'handSize')}
-		<input
-			type="number"
-			min={hand.min}
-			max={Math.min(hand.max, deckSize(saved.deck))}
-			value={saved.handSize}
-			onchange={(e) => {
-				handTouched = true;
-				saved.handSize = clamp(e, hand.min, Math.min(hand.max, deckSize(saved.deck)));
-			}}
-		/>
-		<small>{t(language, 'handSizeHint')}</small>
-	</label>
+				onchange={(e) => {
+					jokersTouched = true;
+					setDeck({ jokers: clamp(e, DECK_LIMITS.jokers.min, DECK_LIMITS.jokers.max) });
+				}}
+			/>
+			<small>{t(language, 'jokersHint')}</small>
+		</label>
+	{/if}
 	<div class="actions">
 		<button type="submit" class="primary big"><Icon name="check" /> {t(language, 'deckSave')}</button>
 	</div>
@@ -142,7 +138,7 @@
 		max-width: 420px;
 		font-size: 0.9em;
 
-		&.hand {
+		&.jokers {
 			max-width: 220px;
 		}
 
@@ -171,6 +167,14 @@
 	.total {
 		opacity: 0.8;
 		margin: 8px 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+
+		.small {
+			font-size: max(16px, 0.9em);
+			padding: 2px 8px;
+		}
 	}
 
 	.actions {

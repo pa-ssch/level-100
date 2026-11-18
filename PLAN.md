@@ -102,7 +102,7 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 ### Phase 4 – Sicherheit und Web-Best-Practices (1 Tag)
 
 - [x] CSP per `kit.csp` (`mode: 'hash'`) als Meta-Tag, ohne `unsafe-inline`/`unsafe-eval`. Einzige Ausnahme: `style-src-attr 'unsafe-hashes'` mit dem Hash des festen style-Attributs von SvelteKits `#svelte-announcer`; `test/csp.test.ts` prüft den Hash gegen die Kit-Quelle (schlägt bei Kit-Updates an).
-- [ ] WebKit meldet für jedes `<select>` unter `style-src 'self'` einen CSP-Verstoß seines internen Stylesheets (Browser-Eigenheit, in `e2e/helpers.ts` nur für WebKit ignoriert). Auf einem echten iPhone prüfen, ob `<select>` korrekt dargestellt wird; sonst in Phase 6 eigene Auswahl-Komponente statt `<select>`.
+- [x] WebKit meldet für jedes `<select>` unter `style-src 'self'` einen CSP-Verstoß seines internen Stylesheets (Browser-Eigenheit, in `e2e/helpers.ts` nur für WebKit ignoriert). Auf echten Geräten geprüft (18.11.2026), `<select>` wird korrekt dargestellt.
 - [x] Referrer-Policy-Meta, `lang` pro Sprache (Hook beim Prerendern, `$effect` bei Client-Navigation).
 - [x] Keine externen Ressourcen. Font Awesome entfernt, 8 Icons als Inline-SVG in `src/lib/icons.ts` + `Icon.svelte` (Build 1,3 MB → 0,3 MB).
 - [x] Kein `{@html}` im Projekt; ESLint-Regel `svelte/no-at-html-tags` (recommended) aktiv, E2E prüft auf Inline-Styles/-Handler im HTML.
@@ -128,8 +128,7 @@ Vorlage: `impressum/page.tsx` und `datenschutz/page.tsx` aus pdfshuffle (Angaben
 Aus ToDo.txt und Kommentaren im Code:
 
 - [x] **Domänenmodell in `src/lib/game/`**: `deck.ts`, `requirements.ts`, `solver.ts`, `difficulty.ts`, `ruleset.ts` (inkl. Validierung), `share.ts`, `game.ts`, `storage.ts`; jeweils mit Unit-Tests.
-- [x] **Prepare-Seite**: Name, Kartendeck (Vorlagen 1–12 / Pokerblatt oder eigenes Deck mit Wertebereich, Farben, Sätzen, Jokern), Handkarten je Level, Level-Editor mit Anforderungen (Gleiche Werte mit optional festem Wert, Folge, Farbfolge, eine Farbe, gerade/ungerade, Freitext), Modus „der Reihe nach“ vs. „frei wählbar“.
-- [ ] Eigene Sonderkarten (z. B. „Aussetzen“) als Deck-Option; derzeit nur über Freitext-Anforderung abbildbar.
+- [x] **Prepare-Seite**: Name, Kartendeck (Vorlagen 1–12 / Pokerblatt oder eigenes Deck mit Wertebereich, Farben, Sätzen; Joker optional, Standard zwei je Satz), Handkarten fürs Spiel, Reihenfolge „der Reihe nach“ vs. „frei wählbar“ (ohne Nummern), Level-Editor mit Anforderungen (Gleiche Werte mit optional festem Wert, Folge, Farbfolge, eine Farbe, gerade/ungerade, Freitext); nicht schaffbare Level sind markiert und sperren „Spielen“.
 - [x] **Schwierigkeit** 1–10 je Level per Simulation (400 zufällige Starthände, Löser prüft Legbarkeit inkl. Joker), live im Editor; Handkarten je Level frei einstellbar.
 - [x] Level nach Schwierigkeit sortieren (Button im Editor).
 - [x] **Teilen**: Regelsatz deflate-komprimiert und base64url in `?r=`, QR-Code lokal erzeugt (`qrcode`), Link-Kopieren; ungültige/überlange Links werden abgefangen.
@@ -142,7 +141,7 @@ Aus ToDo.txt und Kommentaren im Code:
 ### Phase 7 – Mobile, PWA, Feinschliff (1 Tag)
 
 - [x] Responsives Layout (Flex-Wrap, 16 px Gutter), Dark/Light über `prefers-color-scheme`, `prefers-reduced-motion`.
-- [ ] Auf echten Geräten gegenprüfen (iPhone/Android), insbesondere Level-Editor und Rundeneingabe.
+- [x] Auf echten Geräten gegenprüft (iPhone/Android, 18.11.2026), insbesondere Level-Editor und Rundeneingabe.
 - [x] `manifest.webmanifest`, Icons (SVG + 192/512/apple-touch/favicon, aus `static/icons/icon.svg` gerendert), `theme-color`.
 - [ ] Optional Service Worker für Offline (dann Versions-Check wie `scripts/check-sw-version.js` in one-clue).
 - [x] `prefers-reduced-motion` respektieren.
@@ -165,16 +164,14 @@ Konzept: https://claude.ai/artifact/W31WQaP7wZE9YGAu4TjEer. Entscheidungen: Punk
 - [x] Start (S1/S1b): Erstbesuch mit „Neues Spiel“ und „Spiel beitreten“; sonst „Läuft gerade“ und „Favoriten und Verlauf“ mit Stern und Drei-Punkt-Menü (Bearbeiten, Teilen, Duplizieren, Löschen). Kachel antippen startet bzw. setzt fort.
 - [x] Neues Spiel (S2): Zufällig oder Selbst.
 - [x] Zufällig (S3): Deck, Dauer (4/8/12 Level), Schwierigkeit; Generator (`generator.ts`) aus Bausteinkatalog mit Schätzer, aufsteigend, ohne Dubletten; Vorschau mit Einzel-Neuwürfeln, „Anpassen“, Teilen, Spielen; Name automatisch.
-- [x] Selbst (S4): Level aus Bausteinen (`blocks.ts`, Blatt mit häufigen Bausteinen, „Mehr Bausteine“ mit festem Wert und Freitext), Level-Menü, nach Schwierigkeit sortieren, „Mehr“ für Handkarten, Reihenfolge, Punkte.
+- [x] Selbst (S4): Level aus Bausteinen (`blocks.ts`; Blatt mit Gruppen zum Anhaken und Zähler, fester Wert und Freitext mit „Hinzufügen“, fester Kopf und Fuß mit Zusammenfassung), Zeile öffnet das Blatt, Level-Menü (Duplizieren, Entfernen), Griff zum Ziehen oder mit Pfeiltasten, nach Schwierigkeit sortieren, Punkte.
 - [x] Spielen (S5): Fortschritt, eigenes Level groß, „Level geschafft“ / „Runde vorbei, nicht geschafft“, Punkteblatt mit Schnellwerten, freier Modus mit Levelwahl, Ende mit „Nochmal spielen“, Einladen per QR.
 - [x] Beitreten (S6): Name, Level-Vorschau, „Mitspielen“ in einem Tap; `?go=1` aus dem eigenen Verlauf überspringt die Ansicht.
 - [x] Rückmeldung vom 2.11.2026 umgesetzt: Drag & Drop der Level (Griff links), kein „Fertig“/„Teilen“ im Editor (Autosave, Zurück speichert), Name optional („Eigenes Spiel · n Level“), neutrale Auswahl bei „Neues Spiel“, Decks als eigene Ansicht (`/deck`) mit gespeicherten Decks (`level100.decks`, Löschen mit Rückfrage), Reihenfolge/Punkte als Schalter über „Spielen“, freier Modus als Kacheln ohne Nummern und ohne Fortschrittsleiste, „Spieler einladen“ mit „QR-Code anzeigen“ / „Link senden“ (Web Share oder Kopieren), QR-Scanner beim Beitreten (Kamera, lokal dekodiert; Fake-Kamera-Test in Chromium), Eingabefelder mindestens 16 px gegen den iOS-Zoom.
 - [x] Skizzen-Look wie One Clue (7.11.2026): schwarz auf weiß, nur hell, Handschrift „Patrick Hand“ (SIL OFL, selbst gehostet, 14 KB Latin-Subset) für Titel, Buttons, Level-Kasten und Kacheln, normale Schrift für Listen und Kleingedrucktes; unregelmäßige Ränder, harter Schatten, leicht schiefe große Buttons, Wellenlinie unter Titeln. Icon und Vorschaubild im gleichen Strich. Dark Mode bewusst entfernt.
 - [x] Anleitung „Wie geht das?“ (`/how`, fünf Schritte, von der Startseite verlinkt).
 - [x] Rückmeldung vom 7.11.2026: laufendes Spiel abbrechen (im Spiel und im Verlaufsmenü), Rückfragen als eigenes Blatt statt Browser-Alert (Löschen, Deck löschen, Abbrechen), Kachel zeigt „zuletzt heute/gestern/vor n Tagen“ statt Badge, Hinweise unter Kartendeck, Reihenfolge und Punkte zählen. Kein geführter Mehrseiten-Prozess: drei Fragen mit Vorgaben passen auf einen Screen, Erklärungen stehen an Ort und Stelle.
-- [ ] Decks auch außerhalb des Editors pflegen (eigene Ansicht in der Navigation).
-- [ ] Minuten je Level nachmessen und `MINUTES_PER_LEVEL` anpassen.
-- [ ] Auf echten Geräten prüfen (Blatt-Dialoge, Menü, Tastatur beim Punkteblatt).
+- [x] Rückmeldung vom 8.11.2026 zum Editor: Bausteine als Dialog mit Gruppen zum Anhaken und Zähler, fester Kopf und Fuß, Handkarten beim Spiel statt beim Deck, Joker optional, Reihenfolge als Zweier-Auswahl vor den Leveln, keine Nummern bei freier Reihenfolge, „nach oben/unten“ raus (Ziehen oder Pfeiltasten), nicht schaffbare Level markiert und „Spielen“ gesperrt. Auf echten Geräten geprüft (18.11.2026).
 
 ## Offene Punkte aus der Umsetzung
 

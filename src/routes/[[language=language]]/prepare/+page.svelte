@@ -2,8 +2,9 @@
 	import { browser } from '$app/environment';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { addBlock, removeBlock } from '$lib/game/blocks';
+	import { levelProblem } from '$lib/game/blocks';
 	import type { CardDeck } from '$lib/game/deck';
+	import { handSizeAfterDeckChange } from '$lib/game/decks';
 	import { estimateDifficulty } from '$lib/game/difficulty';
 	import { createGame } from '$lib/game/game';
 	import type { Requirement } from '$lib/game/requirements';
@@ -15,7 +16,9 @@
 	import Icon from '$lib/Icon.svelte';
 	import BlockPicker from '$lib/components/BlockPicker.svelte';
 	import DeckPicker from '$lib/components/DeckPicker.svelte';
+	import HandSizeField from '$lib/components/HandSizeField.svelte';
 	import LevelRow from '$lib/components/LevelRow.svelte';
+	import Segmented from '$lib/components/Segmented.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import Switch from '$lib/components/Switch.svelte';
 
@@ -83,14 +86,15 @@
 	});
 	beforeNavigate(flush);
 
-	function setDeck(ruleset: Ruleset, deck: CardDeck, handSize: number) {
+	/** Handkarten gelten für alle Level; das Modell hält sie trotzdem je Level. */
+	function setHandSize(ruleset: Ruleset, handSize: number) {
+		for (const level of ruleset.levels) level.handSize = handSize;
+	}
+
+	function setDeck(ruleset: Ruleset, deck: CardDeck) {
+		const handSize = handSizeAfterDeckChange(ruleset.levels[0]?.handSize ?? 10, $state.snapshot(ruleset.deck), deck);
 		ruleset.deck = deck;
-		for (const level of ruleset.levels) {
-			level.handSize = handSize;
-			for (const r of level.requirements) {
-				if (r.kind === 'set' && r.value !== undefined && (r.value < deck.minValue || r.value > deck.maxValue)) delete r.value;
-			}
-		}
+		setHandSize(ruleset, handSize);
 	}
 
 	function addLevel(ruleset: Ruleset) {
@@ -107,8 +111,6 @@
 				onselect: () => ruleset.levels.splice(i + 1, 0, structuredClone($state.snapshot(ruleset.levels[i])) as Level),
 				disabled: ruleset.levels.length >= RULESET_LIMITS.levels.max
 			},
-			{ label: t(language, 'moveUp'), onselect: () => move(ruleset, i, i - 1), disabled: i === 0 },
-			{ label: t(language, 'moveDown'), onselect: () => move(ruleset, i, i + 1), disabled: i === ruleset.levels.length - 1 },
 			{ label: t(language, 'removeLevel'), onselect: () => ruleset.levels.splice(i, 1), danger: true, disabled: ruleset.levels.length <= 1 }
 		];
 	}
@@ -117,6 +119,16 @@
 		if (to < 0 || to >= ruleset.levels.length || from === to) return;
 		const [level] = ruleset.levels.splice(from, 1);
 		ruleset.levels.splice(to, 0, level);
+	}
+
+	/** Tastatur: Griff behält den Fokus, wenn die Zeile wandert. */
+	function moveByKey(ruleset: Ruleset, from: number, delta: -1 | 1) {
+		const to = from + delta;
+		if (to < 0 || to >= ruleset.levels.length) return;
+		move(ruleset, from, to);
+		requestAnimationFrame(() => {
+			document.querySelector<HTMLElement>(`[data-level-index="${to}"] .grip`)?.focus();
+		});
 	}
 
 	// Drag & Drop über den Griff: die Zeile unter dem Zeiger bestimmt die neue Position.
@@ -140,8 +152,8 @@
 		ruleset.levels = scored.sort((a, b) => a.d - b.d).map((s) => s.level);
 	}
 
-	function pick(ruleset: Ruleset, i: number, r: Requirement) {
-		ruleset.levels[i].requirements = addBlock($state.snapshot(ruleset.levels[i].requirements) as Requirement[], r);
+	function setRequirements(ruleset: Ruleset, i: number, requirements: Requirement[]) {
+		ruleset.levels[i].requirements = requirements;
 	}
 
 	async function play(ruleset: Ruleset) {
@@ -161,7 +173,9 @@
 	<p><a href={href('/[[language=language]]/start', language)}>{t(language, 'toStart')}</a></p>
 {:else if view.status === 'ready'}
 	{@const ruleset = view.ruleset}
-	{@const playable = ruleset.levels.some((l) => l.requirements.length > 0)}
+	{@const handSize = ruleset.levels[0]?.handSize ?? 10}
+	{@const broken = ruleset.levels.some((l) => levelProblem(ruleset.deck, l.handSize, l.requirements) !== null)}
+	{@const playable = !broken && ruleset.levels.some((l) => l.requirements.length > 0)}
 	<form
 		onsubmit={(e) => {
 			e.preventDefault();
@@ -183,8 +197,23 @@
 			deck={ruleset.deck}
 			{language}
 			newDeckHref={href('/[[language=language]]/deck', language, { return: 'prepare', id: ruleset.id })}
-			onchange={(d, h) => setDeck(ruleset, d, h)}
+			onchange={(d) => setDeck(ruleset, d)}
 		/>
+
+		<h2 class="q">{t(language, 'handSizeQ')}</h2>
+		<HandSizeField value={handSize} deck={ruleset.deck} {language} onchange={(n) => setHandSize(ruleset, n)} />
+
+		<h2 class="q">{t(language, 'modeQ')}</h2>
+		<Segmented
+			label={t(language, 'modeQ')}
+			options={[
+				{ value: 'fixed', label: t(language, 'modeFixed') },
+				{ value: 'free', label: t(language, 'modeFree') }
+			]}
+			value={ruleset.mode}
+			onchange={(m) => (ruleset.mode = m)}
+		/>
+		<p class="hint">{ruleset.mode === 'free' ? t(language, 'orderHintFree') : t(language, 'orderHintFixed')}</p>
 
 		<h2 class="q">{t(language, 'levels')}</h2>
 		{#each ruleset.levels as level, i (i)}
@@ -193,15 +222,15 @@
 				index={i}
 				deck={ruleset.deck}
 				{language}
+				numbered={ruleset.mode === 'fixed'}
 				editable
 				dragging={dragIndex === i}
 				menu={levelMenu(ruleset, i)}
-				onaddblock={() => (pickerFor = i)}
-				onremoveblock={(b) =>
-					(ruleset.levels[i].requirements = removeBlock($state.snapshot(ruleset.levels[i].requirements) as Requirement[], b))}
+				onedit={() => (pickerFor = i)}
 				ondragstart={() => (dragIndex = i)}
 				ondragmove={(e) => dragMove(ruleset, e)}
 				ondragend={() => (dragIndex = null)}
+				onmove={(delta) => moveByKey(ruleset, i, delta)}
 			/>
 		{/each}
 		<div class="level-tools">
@@ -218,14 +247,6 @@
 
 		<div class="toggles">
 			<Switch
-				id="mode"
-				checked={ruleset.mode === 'free'}
-				onLabel={t(language, 'orderToggleFree')}
-				offLabel={t(language, 'orderToggle')}
-				onchange={(v) => (ruleset.mode = v ? 'free' : 'fixed')}
-			/>
-			<p class="toggle-hint">{ruleset.mode === 'free' ? t(language, 'orderHintFree') : t(language, 'orderHintFixed')}</p>
-			<Switch
 				id="points"
 				checked={ruleset.points}
 				onLabel={t(language, 'pointsToggle')}
@@ -238,11 +259,22 @@
 		<div class="actions">
 			<button type="submit" class="primary big" disabled={!playable}><Icon name="play" /> {t(language, 'play')}</button>
 		</div>
+		{#if broken}
+			<p class="warn-text blocked" role="alert">{t(language, 'fixLevels')}</p>
+		{/if}
 	</form>
 
 	{#if pickerFor !== null}
 		{@const i = pickerFor}
-		<BlockPicker deck={ruleset.deck} {language} onpick={(r) => pick(ruleset, i, r)} onclose={() => (pickerFor = null)} />
+		<BlockPicker
+			title={ruleset.mode === 'fixed' ? t(language, 'blocksForLevel', { n: i + 1 }) : t(language, 'blockPick')}
+			deck={ruleset.deck}
+			{handSize}
+			requirements={ruleset.levels[i].requirements}
+			{language}
+			onchange={(r) => setRequirements(ruleset, i, r)}
+			onclose={() => (pickerFor = null)}
+		/>
 	{/if}
 {/if}
 
@@ -263,6 +295,12 @@
 	.q {
 		font-size: 0.95em;
 		margin: 18px 0 6px;
+	}
+
+	.hint {
+		margin: 8px 0 0;
+		font-size: 0.9em;
+		opacity: 0.75;
 	}
 
 	.level-tools {
@@ -292,7 +330,7 @@
 
 	.actions {
 		display: flex;
-		margin: 12px 0 24px;
+		margin: 12px 0 8px;
 
 		.big {
 			flex: 1;
@@ -300,5 +338,11 @@
 			padding: 16px;
 			font-size: 1.1em;
 		}
+	}
+
+	.blocked {
+		margin: 0 0 24px;
+		text-align: center;
+		font-size: 0.95em;
 	}
 </style>
